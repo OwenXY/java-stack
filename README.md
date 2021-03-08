@@ -12,8 +12,6 @@
 
 ### 内容说明：
 本仓库存放的是个人笔记
-
-训练营详细信息请关注公众号【**石头杉架构笔记**】了解
 ### 语雀和各种公众号
 
 
@@ -75,10 +73,10 @@
   - [分布式服务治理](#分布式服务治理)
   - [分布式架构基础](#分布式架构基础)
 - [系统设计](#系统设计)
-- [内容心法](#内容心法)
+- [内功心法](#内功心法)
   - [软件设计原则](#软件设计原则)
   - [设计模式](#设计模式)
-  - [算法与数据结构]](#算法与数据结构)
+  - [算法与数据结构](#算法与数据结构)
 - [日常摘录及问题总结](#日常摘录及问题总结)
   - [第一季:分布式](#第一季-分布式)
   - [第二季:高并发](#第二季-高并发)
@@ -91,17 +89,14 @@
   - [Maven](#第二季-高并发)
 
 
-## 面试指南
+## 大纲
 
 ### java核心知识
-- [面试一线互联网大厂？那这道题目你必须得会！](https://mp.weixin.qq.com/s?__biz=MzU0OTk3ODQ3Ng==&mid=2247484645&idx=1&sn=663238af983603a4c0b33cf42c3ebbcf&chksm=fba6ece6ccd165f0d78f271a21fdc1b91ad8d3def896e2f4df79d9c8d4cf99e3b2978d703dde&mpshare=1&scene=1&srcid=0608edSfhNw7AIjzl9R54Sih%23rd)
-- [阿里三面，P9面试官是如何360°无死角考察候选人的？](https://mp.weixin.qq.com/s?__biz=MzU0OTk3ODQ3Ng==&mid=2247485021&idx=1&sn=936b0ecbbe8bd633b1a6c10127eaf4c4&chksm=fba6ee5eccd167483e2a5b17df3f3d1f38f9b98b894f3c47d6b365821338e1380f7c6af1a49d&mpshare=1&scene=1&srcid=0608bZo70WnyWgBMGZs9aAPA%23rd)
-- [互联网公司的面试官是如何360°无死角考察候选人的？（上篇）](https://mp.weixin.qq.com/s?__biz=MzU0OTk3ODQ3Ng==&mid=2247484144&idx=1&sn=a6b86d38a762e317ba78e2500fb1a8ff&chksm=fba6eaf3ccd163e5403a01be51216780040511b2ddc4d5750ace6e46b4242ceaf77d0432c680&mpshare=1&scene=1&srcid=0608Ls6BQxXTdAQKvDeZx8f0%23rd)
-- [互联网公司面试官是如何360°无死角考察候选人的？（下篇）](https://mp.weixin.qq.com/s?__biz=MzU0OTk3ODQ3Ng==&mid=2247484148&idx=1&sn=a2e05fed6b2dda661b4da11036b883a9&chksm=fba6eaf7ccd163e19013c4204fd0997159b04cd37a235d05dab4f645b61b2f8f9e21a98614c8&mpshare=1&scene=1&srcid=0608k7qLNodHSqW0SbfpZLRG%23rd)
-- [中小公司的Java工程师应该如何逆袭冲进BAT？](https://mp.weixin.qq.com/s?__biz=MzU0OTk3ODQ3Ng==&mid=2247484442&idx=1&sn=610f02aa18ef6a5d8c80a74959be0333&chksm=fba6ec19ccd1650fc265ac6f7f462157a7b274e358282bb7fc029e9366cfac656c58300b98c5&mpshare=1&scene=1&srcid=06089lyagf3w18D90N7RcB8q%23rd)
-- [【offer收割机必备】我简历上的Java项目都好low，怎么办？](https://mp.weixin.qq.com/s?__biz=MzU0OTk3ODQ3Ng==&mid=2247484583&idx=1&sn=a9d43c3ee63c8e5a37c073c2b8c43fba&chksm=fba6eca4ccd165b2602a462c5589fa8dacd78558bdee7e0138b02bb26370637714f1094f4e9f&mpshare=1&scene=1&srcid=0608607GubfCXM2YaAqOLXET%23rd)
-- [Java工程师如何在1个月内做好面试准备？](https://mp.weixin.qq.com/s?__biz=MzU0OTk3ODQ3Ng==&mid=2247484575&idx=1&sn=7075fb3a42ef62fb5e69c868f29c8c61&chksm=fba6ec9cccd1658a391bc4e60faa35b44b947dbb6f535042e392c668693524447a2604955fd8&mpshare=1&scene=1&srcid=0608BvwQetAYtHkxZX7X7r8F%23rd)
-### 常见面试题总结
+#### [jvm](/docs/javacore/jvm.md)
+#### [security](/docs/javacore/security.md)
+#### [并发编程](/docs/javacore/security.md)
+#### [基础](/docs/javacore/base.md)
+### 计算机网络
 - [互联网大厂Java面试题：使用无界队列的线程池会导致内存飙升吗？](https://mp.weixin.qq.com/s?__biz=MzU0OTk3ODQ3Ng==&mid=2247484480&idx=1&sn=1c7262d7f185ad6f99b840fb7779a575&chksm=fba6ec43ccd16555d826772a530c280548d8fd9785a9169b87bb4ed82d8b12ad75154c98b957&mpshare=1&scene=1&srcid=0608DxO0IKPDPxNOoN1la590%23rd)
 - [阿里一面：关于【缓存穿透、缓存击穿、缓存雪崩、热点数据失效】问题的解决方案](https://mp.weixin.qq.com/s?__biz=MzU0OTk3ODQ3Ng==&mid=2247484884&idx=1&sn=ceb798b6e8ef0ee608a992385f7d8568&chksm=fba6edd7ccd164c155271811f7948b476955cab41b23f2333847b8c268b31cc9f3332c2e3926&mpshare=1&scene=1&srcid=0608pIX1L8Fja1H99IyorW2X%23rd)
 - [大白话聊聊Java并发面试问题之volatile到底是什么？](https://mp.weixin.qq.com/s?__biz=MzU0OTk3ODQ3Ng==&mid=2247484058&idx=1&sn=d5c1533204ea655e65947ec57f924799&chksm=fba6ea99ccd1638f945c585cf3b2df6f4d4112b17ea3648730d50fdb5508555d5f30316f4186&mpshare=1&scene=1&srcid=0608cDtcDBaGNgIU9v4zxS3f%23rd)
