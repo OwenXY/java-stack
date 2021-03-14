@@ -18,6 +18,9 @@
 
 一个类从加载到使用一般经历一下几个过程
 
+![JVM的类加载器亲子层级](https://github.com/zuolinlin/java-stack/blob/main/docs/java-core/images/class_loader_process.png)
+
+
 **加载**--**验证**--**准备**--**解析**--**初始化**--**使用**--**卸载**
 
 加载阶段：
@@ -64,3 +67,7 @@
 jvm的类加载器是有亲子层级机构的，就是启动类加载器子啊最上层，拓展类加载器在第二层，第三层是应用程序类加载器，最下面一层是自定义加载器
 
 ![JVM的类加载器亲子层级](https://github.com/zuolinlin/java-stack/blob/main/docs/java-core/images/classloder-qinzichengji.png)
+
+基于这个亲子层级关系，就有一个**双亲委派机制**
+
+双亲委派机制：先由父类加载，不行的话在由儿子来加载。
