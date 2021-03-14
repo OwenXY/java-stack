@@ -78,10 +78,10 @@ ________# Java技术栈笔记
 ## 大纲
 
 ### java核心知识
-- [jvm](/docs/javacore/jvm.md)
-- [security](/docs/javacore/jvm.md)
-- [并发编程](/docs/javacore/concurrent.md)
-- [基础](/docs/javacore/base.md)
+- [jvm](/docs/java-core/jvm.md)
+- [security](/docs/java-core/jvm.md)
+- [并发编程](/docs/java-core/concurrent.md)
+- [基础](/docs/java-core/base.md)
 ### 计算机网络
 - [IO多路复用分享](/docs/network/IO多路复用.md)
 - [Linux Epoll原理解析](/docs/network/LinuxEpoll原理解析.md)
@@ -131,7 +131,7 @@ ________# Java技术栈笔记
 - [git](/docs/devOps/git.md)
 - [maven](/docs/devOps/maven.md)  
 - [docker](/docs/devOps/docker.md) 
-### [面试专栏](/docs/InterviewAdvance/interview.md)
+### [面试专栏](/docs/Interview/interview.md)
   - [石杉面试突击第一季](#石杉面试突击第一季)
   - [石杉面试突击第二季](#石杉面试突击第二季)
   - [石杉面试突击第三季](#石杉面试突击第三季)
