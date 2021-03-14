@@ -1,2 +1,2 @@
-# 从0开始带你成为JVM实战高手
-## 我们写的代码到底是如何被运行起来的
+# JVM
+![我们编写的java文件被执行的过程](/docs/javacore/images/jvm-yinxing.png)
