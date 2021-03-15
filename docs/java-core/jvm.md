@@ -8,7 +8,7 @@
 ## 大纲
 ### 我们写的Java代码到底是如何运行起来的
     
-![我们编写的java文件被执行的过程](https://github.com/zuolinlin/java-stack/blob/main/docs/java-core/images/jvm-process.png)
+![我们编写的java文件被执行的过程](images/jvm-process.png)
         
     JVM要运行这些字节码文件，首先得把这些.class文件加载进来
     此时会采用类加载器将这些字节码文件加载搭配JVM，供后续的代码运行使用
@@ -19,7 +19,7 @@
 
 一个类从加载到使用一般经历一下几个过程
 
-![JVM的类加载器亲子层级](https://github.com/zuolinlin/java-stack/blob/main/docs/java-core/images/class_loader_process.png)
+![JVM的类加载器亲子层级](images/class_loader_process.png)
 
 
 **加载**--**验证**--**准备**--**解析**--**初始化**--**使用**--**卸载**
@@ -67,12 +67,13 @@
 
 jvm的类加载器是有亲子层级机构的，就是启动类加载器子啊最上层，拓展类加载器在第二层，第三层是应用程序类加载器，最下面一层是自定义加载器
 
-![JVM的类加载器亲子层级](https://github.com/zuolinlin/java-stack/blob/main/docs/java-core/images/classloder-qinzichengji.png)
+![JVM的类加载器亲子层级](images/classloder-qinzichengji.png)
 
 基于这个亲子层级关系，就有一个**双亲委派机制**
 
 双亲委派机制：先由父类加载，不行的话在由儿子来加载。
-![JVM的类加载器亲子层级](https://github.com/zuolinlin/java-stack/blob/main/docs/java-core/images/class_loader_shuangqinweipai.png)
+
+![JVM的类加载器亲子层级](images/class_loader_shuangqinweipai.png)
 
 
 首先类加载器由JVM提供，类加载器逻辑的第一个阶段解释加载阶段，后面的由JVM完成。
@@ -92,31 +93,36 @@ jvm的类加载器是有亲子层级机构的，就是启动类加载器子啊�
  
  - 程序计数器
    
-现在当JVM加载类信息到内存之后，实际上就是使用自己的字节码执行引擎，去执行我们写的代码编译出来的代码指令
+    现在当JVM加载类信息到内存之后，实际上就是使用自己的字节码执行引擎，去执行我们写的代码编译出来的代码指令
+    
+    ![jvm是有字节码执行引擎去执行.call文件里面的指令](images/zijiemazhixingyinqing.png)
+    
+    那么在执行字节码的时候，就需要一块特殊的指令区域:**程序计数器**
+    
+    这个程序计数器就是来记录，当前**字节码指令执行位置的**
+    
+    每个线程都有一个自己的程序指令器
 
-![jvm是有字节码执行引擎去执行.call文件里面的指令](https://github.com/zuolinlin/java-stack/blob/main/docs/java-core/images/zijiemazhixingyinqing.png)
-
-那么在执行字节码的时候，就需要一块特殊的指令区域:**程序计数器**
-
-这个程序计数器就是来记录，当前**字节码指令执行位置的**
-
-每个线程都有一个自己的程序指令器
-
-![每个线程都有一个自己的程序指令器](https://github.com/zuolinlin/java-stack/blob/main/docs/java-core/images/chengxujishuqi.png)
+![每个线程都有一个自己的程序指令器](images/chengxujishuqi.png)
 
  - java虚拟机栈
 
-        java代码在执行的时候一定是一个线程来执行某个方法中的代码，
-        但是在方法里，我们会定义一些方法内的局部变量，
-        因此，JVM必须有一块区域来保存方法内的**局部变量**等数据，这个区域就是**java虚拟机栈**
-        
-        **每个线程都有自己的java虚拟机栈，**
-        
-        如果一个线程执行一个方法，**就会对这个方法调用创建一个栈帧**
-        
-        栈帧里就会有这个方法的局部变量表，操作数栈，动态链表，方法出口等
-        
-        在执行方法的时候会创建栈桢，压入到java虚拟机栈中，当方法执行完成时们，就会把对应方法的栈桢，从java虚拟机中出栈
-        
-![img.png](https://github.com/zuolinlin/java-stack/blob/main/docs/java-core/images/javaxunijizhan.png)
+    java代码在执行的时候一定是一个线程来执行某个方法中的代码，
+    但是在方法里，我们会定义一些方法内的局部变量，
+    因此，JVM必须有一块区域来保存方法内的**局部变量**等数据，这个区域就是**java虚拟机栈**
+    
+    **每个线程都有自己的java虚拟机栈，**
+    
+    如果一个线程执行一个方法，**就会对这个方法调用创建一个栈帧**
+    
+    栈帧里就会有这个方法的局部变量表，操作数栈，动态链表，方法出口等
+    
+    在执行方法的时候会创建栈桢，压入到java虚拟机栈中，当方法执行完成时们，就会把对应方法的栈桢，从java虚拟机中出栈
+    
+![img.png](images/javaxunijizhan.png)
 
+- java堆内存
+    主要存放我们创建的对象
+  
+核心内存区域的全流程串讲
+![img.png](images/jvm_allprocess.png)
