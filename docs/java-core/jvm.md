@@ -88,3 +88,9 @@ jvm的类加载器是有亲子层级机构的，就是启动类加载器子啊�
     
     现在当JVM加载类信息到内存之后，实际上就是使用自己的字节码执行引擎，去执行我们写的代码编译出来的代码指令
 ![jvm是有字节码执行引擎去执行.call文件里面的指令](https://github.com/zuolinlin/java-stack/blob/main/docs/java-core/images/zijiemazhixingyinqing.png)
+
+那么在执行字节码的时候，就需要一块特殊的指令区域:**程序计数器**
+这个程序计数器就是来**记录，当前字节码指令执行位置的**
+
+每个线程都有一个自己的程序指令器
+![img.png](https://github.com/zuolinlin/java-stack/blob/main/docs/java-core/images/chengxujishuqi.png)
