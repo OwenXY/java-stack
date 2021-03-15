@@ -93,7 +93,7 @@ jvm的类加载器是有亲子层级机构的，就是启动类加载器子啊�
 这个程序计数器就是来**记录，当前字节码指令执行位置的**
 
 每个线程都有一个自己的程序指令器
-![img.png](https://github.com/zuolinlin/java-stack/blob/main/docs/java-core/images/chengxujishuqi.png)
+![每个线程都有一个自己的程序指令器](https://github.com/zuolinlin/java-stack/blob/main/docs/java-core/images/chengxujishuqi.png)
 
 **java虚拟机栈**
 
@@ -103,3 +103,6 @@ jvm的类加载器是有亲子层级机构的，就是启动类加载器子啊�
 **每个线程都有自己的java虚拟机栈，**
 如果一个线程执行一个方法，**就会对这个方法调用创建一个栈帧**
 栈帧里就会有这个方法的局部变量表，操作数栈，动态链表，方法出口等
+在执行方法的时候会创建栈桢，压入到java虚拟机栈中，当方法执行完成时们，就会把对应方法的栈桢，从java虚拟机中出栈
+
+![img.png](https://github.com/zuolinlin/java-stack/blob/main/docs/java-core/images/javaxunijizhan.png)
