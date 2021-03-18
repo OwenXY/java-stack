@@ -235,15 +235,34 @@ java将堆内存划分为新生代代  老年代
 
 **跟JVM内存相关的介个核心参数图解**
 在JVM内存分配中，几个核心参数比较重要
-1. -Xms java堆内存的大小
-2. -Xmx java堆内存的最大大小
-3. -Xmn java堆内存中新生代大小，扣除新生代剩下的就是老年代的内存了
-4. -XX:PermSize 永久代大小 java1.8之后替换为 -XX:MetaSpaceSize 
-5. -XX:MaxPermSize 永久代的最大大小 java1.8之后替换为  -XX:MaxMetaSpaceSize
-6. -Xss:每个线程的栈内存大小
+
+        1. -Xms java堆内存的大小
+        2. -Xmx java堆内存的最大大小
+        3. -Xmn java堆内存中新生代大小，扣除新生代剩下的就是老年代的内存了
+        4. -XX:PermSize 永久代大小 java1.8之后替换为 -XX:MetaSpaceSize 
+        5. -XX:MaxPermSize 永久代的最大大小 java1.8之后替换为  -XX:MaxMetaSpaceSize
+        6. -Xss:每个线程的栈内存大小
 
 ![img.png](images/jvm_params.png)
 
 
 
+**如何启动JVM参数**
 
+
+**如何设置堆内存大小**
+
+    根据对象创建的速度和对象的大小（每个属性的占用的字节数） 去估算
+
+**如何设置永久代大小** 
+
+    一般设置个几百兆
+
+**如何设置栈内存大小**
+
+     默认512kb -1M
+
+
+ **什么时候会触发垃圾回收**
+
+    **新生代快满的时候就会触发垃圾回收，这就是新生代核心的垃圾回收触发时机**
