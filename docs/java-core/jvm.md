@@ -10,6 +10,13 @@
     - [JVM分代模型](#JVM分代模型)
     - [JVM垃圾回收算法](#JVM垃圾回收算法)
 - [JVM垃圾回收器](#JVM垃圾回收器)
+    - [parNew垃圾回收器](#parNew垃圾回收器)
+    - [CMS垃圾回收器](#CMS垃圾回收器)
+    - [G1垃圾回收器](#G1垃圾回收器)
+- [JVM实战](#JVM实战)
+    - [自己动手模拟出频繁Young GC的场景体验一下！](#自己动手模拟出频繁Young GC的场景体验一下！)
+    - [使用jstat摸清线上系统的JVM运行状况](#使用jstat摸清线上系统的JVM运行状况)
+    - [使用jmap和jhat摸清线上系统的对象分布](#使用jmap和jhat摸清线上系统的对象分布)
 ## 大纲
 ## JVM运行原理
 ### jvm核心运行流程
@@ -397,7 +404,8 @@ java将堆内存划分为新生代代  老年代
 
             G1
 
-**parNew垃圾回收器**
+#### parNew垃圾回收器
+
 **parNew大致原理图如下**
 
 ![img.png](images/parNew.png)
@@ -414,7 +422,7 @@ java将堆内存划分为新生代代  老年代
     但是你一定要调节parNew垃圾回收器回收线程数量也是可以的，使用 **-XX:ParallelGCThread** 设置参数即可设置它的线程数量，但是建议一般不要随便动这个参数
 
 
-**CMS垃圾回收器**
+#### CMS垃圾回收器
 **CMS垃圾回收的基本原理**
     
     采用的是标记-清理算法
@@ -512,7 +520,7 @@ CMS有一个参数是 **-XX:+UseCMSCompactAtFullCollection** 默认就打开的
     3.第三是新生代MinorGC后存活对象大于Survivor，那么就会进入老年代，此时老年代内存不足
     4.-XX:CMSInitialingOccparencyFaction
 
-**G1垃圾回收器**
+#### G1垃圾回收器
 
 **parNew+CMS 组合让我们有哪些痛点**
 stop the world 这是最痛的一个痛点
@@ -616,4 +624,133 @@ FullGc 其实就是包含了YoungGC 和OldGC
 
 假如存放永久代的类信息，常量池满了之后，就会触发一次FullGC。
 如果回收之后发现没腾出来更多的地方，只能抛出内存不够的异常。
+
+
+
+### JVM实战
+
+#### 自己动手模拟出频繁YoungGC的场景体验一下！
+
+https://apppukyptrl1086.pc.xiaoe-tech.com/detail/i_5d11e5a85d6b2_DwhvAoB3/1?from=p_5d0ef9900e896_MyDfcJi8&type=6
+
+**如何打印初JVM日志**
+
+1. -XX:+PrintGCDetils：打印详细的gc⽇志
+2. -XX:+PrintGCTimeStamps：这个参数可以打印出来每次GC发⽣的时间
+3. -Xloggc:gc.log：这个参数可以设置将gc⽇志写⼊⼀个磁盘⽂件
+    
+        -XX:NewSize=5242880
+        -XX:MaxNewSize=5242880
+        -XX:InitialHeapSize=10485760
+        -XX:MaxHeapSize=10485760
+        -XX:SurvivorRatio=8
+        -XX:PretenureSizeThreshold=10485760
+        -XX:+UseParNewGC
+        -XX:+UseConcMarkSweepGC
+        -XX:+PrintGCDetails
+        -XX:+PrintGCTimeStamps
+        -Xloggc:gc.log
+
+**JVM的YoungGC日志** 
+
+https://apppukyptrl1086.pc.xiaoe-tech.com/detail/i_5d11e5cb74122_FMDnQJY8/1?from=p_5d0ef9900e896_MyDfcJi8&type=6
+
+
+#### 自己动手模拟出对象进入老年代的场景体验一下
+
+https://apppukyptrl1086.pc.xiaoe-tech.com/detail/i_5d11e5f81ddb5_Lb2e4fEx/1?from=p_5d0ef9900e896_MyDfcJi8&type=6
+
+https://apppukyptrl1086.pc.xiaoe-tech.com/detail/i_5d11e621d622a_fQtn5OrT/1?from=p_5d0ef9900e896_MyDfcJi8&type=6
+
+**JVM的Full GC日志**
+
+
+https://apppukyptrl1086.pc.xiaoe-tech.com/detail/i_5d11e648db045_G5rICbYJ/1?from=p_5d0ef9900e896_MyDfcJi8&type=6
+
+
+#### 使用jstat摸清线上系统的JVM运行状况
+
+https://apppukyptrl1086.pc.xiaoe-tech.com/detail/i_5d11e6b3c5c6a_K6Xk3Bs1/1?from=p_5d0ef9900e896_MyDfcJi8&type=6
+
+
+平常我们对运行中的系统，如果要检查他的JVM整体的运行情况，比较实用的工具就是 jstat
+
+**jstat -gc PID**
+首先第一个命令就是在你们生产的机器的linux上，找到你们java进程的PID
+
+运⾏这个命令之后会看到如下列，给⼤家解释⼀下：
+1. S0C：这是From Survivor区的⼤⼩
+2. S1C：这是To Survivor区的⼤⼩
+3. S0U：这是From Survivor区当前使⽤的内存⼤⼩
+4. S1U：这是To Survivor区当前使⽤的内存⼤⼩
+5. EC：这是Eden区的⼤⼩
+6. EU：这是Eden区当前使⽤的内存⼤⼩
+7. OC：这是⽼年代的⼤⼩
+8. OU：这是⽼年代当前使⽤的内存⼤⼩
+9. MC：这是⽅法区（永久代、元数据区）的⼤⼩
+10. MU：这是⽅法区（永久代、元数据区）的当前使⽤的内存⼤⼩
+11. YGC：这是系统运⾏迄今为⽌的Young GC次数
+12. YGCT：这是Young GC的耗时
+13. FGC：这是系统运⾏迄今为⽌的Full GC次数
+14. FGCT：这是Full GC的耗时
+15. GCT：这是所有GC的总耗时
+
+**其他的jstat命令**
+1. jstat -gccapacity PID：堆内存分析
+2. jstat -gcnew PID：年轻代GC分析，这⾥的TT和MTT可以看到对象在年轻代存活的年龄和存活的最⼤年龄
+3. jstat -gcnewcapacity PID：年轻代内存分析
+4. jstat -gcold PID：⽼年代GC分析
+5. jstat -gcoldcapacity PID：⽼年代内存分析
+6. jstat -gcmetacapacity PID：元数据区内存分析
+
+
+
+**到底该如何使用jstat工具**
+
+
+新生代对象的增长速率
+
+jstat -gc 1000 10 ：每隔1s更新最新的一行jstat统计信息，一共执行10次jstat
+
+**Young GC的触发频率和每次耗时**
+
+**每次Young GC 后多少对象是存活的和进入老年代的**
+
+
+
+#### 使用jmap和jhat摸清线上系统的对象分布
+使用jstat就可以非常轻松便捷的了解到线上系统的运行状态，从对象增速，Young GC 触发频率以及耗时，再到对象进入老年代的增速，以及Full GC 触发频率以及耗时，可以完全摸清楚线上系统JVM运行情况
+
+到底什么对象占据了这么大的内存
+
+先看一个命令 **jmap -heap PID** 
+
+使用jmap 了解系统运行时对象分布式
+
+jmap -histo PID :如果想了解JVM中对象内存的占用情况
+
+
+使用jmap生成堆内存存储快照
+
+jmap -dump:live,format=b,file=dump.hprof PID
+
+这个命令会在当前目录下生成一个dump.hprof文件，这里是一个二进制文件，他把 这一时刻JVM堆内存里所有对象的快照都放到这个文件中
+供后续分析
+
+5.使用jhat 在浏览器中分析堆转出快照
+使用如下命令可以启动jhat服务器，还可以指定自己想要的http端口号，默认好似7000端口
+jhat dump.hprof -port 7000 
+
+如何分析JVM运行状况及合理优化？
+
+优化思路其实简单来说就是一句话：
+尽量让每次Young GC 存活的对象小于survivor区域的50Z5，都留在年轻代里；尽量别让对象进入老年代。
+尽量减少fullGC的频率，避免Full GC对JVM性能的影响。
+
+比较 常用的监控系统：
+Zabbix OpenFalcon Ganglia 等等
+
+然后部署你的系统，把JVM的监控项发送到这些监控系统中，此时你就可以在这些监控系统中可视化的界面看到你需要的指标数据
+
+
 
