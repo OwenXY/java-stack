@@ -5,6 +5,7 @@
     - [社区](#社区)
     - [5.1新增功能](#5.1新增功能)
     - [获得SpringSecurity](#获得SpringSecurity)
+    - [项目模块](#项目模块)
 - [servlet应用程序](#servlet应用程序)
     - [java配置](#java配置)
     - [安全命令空间配置](#安全命令空间配置)
@@ -165,6 +166,41 @@ Spring Security 版本的格式为 MAJOR.MINOR.PATCH，这样
     PATCH 级别应完全兼容，向前和向后兼容，可能存在的 exception 是为了修复错误
     Maven用法
 ##### maven用法
+
+###### 使用 Maven 进行 Spring Boot
+```java
+
+<dependencies>
+    <!-- ... other dependency elements ... -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-security</artifactId>
+    </dependency>
+</dependencies>
+```
+
+由于 Spring Boot 提供了一个 Maven BOM 来 Management 依赖版本，因此无需指定版本。如果您想覆盖 Spring Security 版本，可以通过提供 Maven 属性来实现：
+
+```java
+
+<properties>
+    <!-- ... -->
+    <spring-security.version>5.1.2.RELEASE</spring-security.version>
+</dependencies>
+```
+
+由于 Spring Security 仅在主要版本中进行重大更改，因此可以安全地在 Spring Boot 中使用更新版本的 Spring Security。但是，有时可能还需要更新 Spring Framework 的版本。
+也可以通过添加 Maven 属性轻松完成此操作
+
+```java
+<properties>
+    <!-- ... -->
+    <spring.version>5.1.3.RELEASE</spring.version>
+</dependencies>
+```
+
+###### 没有 Spring Boot 的 Maven
+
 最小的SpringSecurity maven依赖
 ```java
     <dependencies>
@@ -182,7 +218,7 @@ Spring Security 版本的格式为 MAJOR.MINOR.PATCH，这样
     </dependencies>
 
 ```
-maven Repositories
+###### Maven 存储库
 所有的GA版本（即以.RELEASE结尾的版本），均已部署到MavenCentral，因此无需在pom中申明其他maven存储库
 
 如果您使用的是 SNAPSHOT 版本，则需要确保已定义 Spring Snapshot 存储库，如下所示
@@ -237,7 +273,7 @@ Note
 
     此方法使用 Maven 的“物料 Lists”(BOM)概念，并且仅在 Maven 2.0.9 中可用。有关如何解决依赖关系的其他详细信息，请参见Maven 的依赖机制简介文档。
 
-##### 项目模块
+#### 项目模块
 
 核心包：spring-security-core.jar
     
