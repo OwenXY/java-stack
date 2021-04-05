@@ -331,19 +331,12 @@ OAuth 2.0:JOSE-spring-security-oauth2-jose.jar
         JSON Web 签名(JWS)
         
         JSON Web 加密(JWE)
+
     它包含顶级软件包：
 
         org.springframework.security.oauth2.jwt
         
         org.springframework.security.oauth2.jose
-
-JSON Web 密钥(JWK)
-
-它包含顶级软件包：
-
-org.springframework.security.oauth2.jwt
-
-org.springframework.security.oauth2.jose
 
 ACL：spring-security-acl.jar 
 
