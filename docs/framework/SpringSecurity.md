@@ -2,11 +2,9 @@
 
 ##  目录
 - [前言](#前言)
-    - [介绍](#介绍)
-    - [ProjectModule](#ProjectModule)
-    - [SampleApplication](#SampleApplication)
-    - [社区](#安全命令空间配置)
+    - [社区](#社区)
     - [5.1新增功能](#5.1新增功能)
+    - [获得SpringSecurity](#获得SpringSecurity)
 - [servlet应用程序](#servlet应用程序)
     - [java配置](#java配置)
     - [安全命令空间配置](#安全命令空间配置)
@@ -81,14 +79,17 @@
 
 ### 前言
 
-#### 介绍
+#### 社区
+
+###### 源代码
 
 Spring Security 为基于 Java EE 的企业软件应用程序提供了全面的安全解决方案。
 应用程序安全性的两个主要方面是“**身份验证**”和“**授权**”(或“访问控制”)。
 这是 Spring Security 的两个主要领域。
 “**认证**”是构建委托人的过程，所谓委托人就是他们所宣称的身份(“主要”通常是指可以在您的应用程序中执行操作的用户，设备或其他系统)。
 “**授权**”是指确定的过程是否允许委托人在您的应用程序中执行操作。为了到达需要授权决策的位置，主体的身份已经通过身份验证过程确定。这些概念是通用的，并非完全针对于 Spring Security。
-**源码**
+
+##### 源码
 
     git clone https://github.com/spring-projects/spring-security.git
 
@@ -154,7 +155,16 @@ HTTP BASIC 身份验证 Headers(基于 IETF RFC 的标准)
   -您自己的身份验证系统(请参见下文)
   
 #### 获取SpringSecurity
-Maven用法
+
+Spring Security 版本的格式为 MAJOR.MINOR.PATCH，这样
+
+    主要版本可能包含重大更改。通常，这样做是为了提供改进的安全性以匹配现代安全性实践。
+    
+    MINOR 版本包含增强功能，但被视为被动更新
+    
+    PATCH 级别应完全兼容，向前和向后兼容，可能存在的 exception 是为了修复错误
+    Maven用法
+##### maven用法
 最小的SpringSecurity maven依赖
 ```java
     <dependencies>
