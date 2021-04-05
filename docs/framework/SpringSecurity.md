@@ -303,6 +303,48 @@ LDAP：spring-security-ldap.jar
     LDAP 身份验证和配置代码。如果您需要使用 LDAP 身份验证或 ManagementLDAP 用户条目，则为必需。
     顶级软件包是org.springframework.security.ldap。
 
+OAuth 2.0 核心:spring-security-oauth2-core.jar
+
+        spring-security-oauth2-core.jar包含核心类和接口，这些类和接口提供对* OAuth 2.0 授权框架和 OpenID Connect Core 1.0 的支持。
+        使用 OAuth 2.0 或 OpenID Connect Core 1.0 *的应用程序(例如 Client 端，资源服务器和授权服务器)需要它。
+        顶级软件包是org.springframework.security.oauth2.core。
+
+OAuth 2.0Client:spring-security-oauth2-client.jar
+
+    spring-security-oauth2-client.jar是 Spring Security 对* OAuth 2.0 Authorization Framework 和 OpenID Connect Core 1.0 *的 Client 端支持。
+    利用 OAuth 2.0 登录 和/或 OAuthClient 端支持的应用程序需要。顶级软件包是org.springframework.security.oauth2.client。
+
+OAuth 2.0:JOSE-spring-security-oauth2-jose.jar
+    
+    spring-security-oauth2-jose.jar包含 Spring Security 对* JOSE *(Javascript 对象签名和加密)框架的支持。 
+    * JOSE *框架旨在提供一种在各方之间安全转移索赔的方法。它是根据一系列规范构建的：
+        JSON Web 令牌(JWT)
+
+        JSON Web 签名(JWS)
+        
+        JSON Web 加密(JWE)
+        
+        JSON Web 密钥(JWK)
+        
+        JSON Web 令牌(JWT)
+        
+        JSON Web 签名(JWS)
+        
+        JSON Web 加密(JWE)
+    它包含顶级软件包：
+
+        org.springframework.security.oauth2.jwt
+        
+        org.springframework.security.oauth2.jose
+
+JSON Web 密钥(JWK)
+
+它包含顶级软件包：
+
+org.springframework.security.oauth2.jwt
+
+org.springframework.security.oauth2.jose
+
 ACL：spring-security-acl.jar 
 
     专门的域对象 ACL 实现。用于将安全性应用于应用程序中的特定域对象实例。
