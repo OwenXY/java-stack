@@ -1,4 +1,4 @@
-________# Java技术栈笔记
+# Java技术栈笔记
 
 [![reading](https://badgen.net/badge/books/read%20together/cyan)]
 [![coding](https://badgen.net/badge/leetcode/coding%20together/cyan)]
@@ -31,6 +31,8 @@ ________# Java技术栈笔记
     - [当你输入一个网址的时候，实际会发生什么?](#当你输入一个网址的时候，实际会发生什么)
     - [HTTP协议的底层实现](#HTTP协议的底层实现)
     - [BIO\NIO\Epoll\IO复用](#BIO\NIO\Epoll\IO复用)
+- [计算机是怎么跑起来的](#计算机是怎么跑起来的)
+  - [IO多路复用分享](#IO多路复用分享)
 - [开源框架](#开源框架)
     - [spring](#spring)
     - [spring boot](#第四季-海量数据)
@@ -93,18 +95,20 @@ ________# Java技术栈笔记
 - [当你输入一个网址的时候，实际会发生什么?](https://mp.weixin.qq.com/s?__biz=MzU0OTk3ODQ3Ng==&mid=2247484257&idx=1&sn=e7704f92a1008ab7a292e2826bd079aa&chksm=fba6eb62ccd1627451d439bbc21e46e6fc1d7bfbe2a431fd887cf974a7bd0d9d482697f0e4fd&mpshare=1&scene=1&srcid=0608mcZB6SlZ2JGY46F7giS3%23rd)
 - [BIO\NIO\Epoll\IO复用](BIO\NIO\Epoll\IO复用.md)
 
-
+### 计算机网络
+- [IO多路复用分享](/docs/network/IO多路复用.md)
 
 ### 开源框架
-- [spring](/docs/farmework/spring.md)
-- [spring boot](/docs/farmework/springboot.md)
-- [spring cloud netflix](/docs/farmework/springcloudnetflix.md)
-- [spring clond alibaba](/docs/farmework/springcloudalibaba.md)
-- [netty](/docs/farmework/netty.md)
-- [zookeeper](/docs/farmework/zookeeper.md)
-- [elasticsearch](/docs/farmework/elasticsearch.md)
-- [消息中间件](/docs/farmework/消息中间件.md)
-- [Guava](/docs/farmework/Guava.md)
+- [spring](/docs/framework/spring.md)
+- [spring boot](/docs/framework/springboot.md)
+- [SpringSecurity](/docs/framework/SpringSecurity.md)
+- [spring cloud netflix](/docs/framework/springcloudnetflix.md)
+- [spring clond alibaba](/docs/framework/springcloudalibaba.md)
+- [netty](/docs/framework/netty.md)
+- [zookeeper](/docs/framework/zookeeper.md)
+- [elasticsearch](/docs/framework/elasticsearch.md)
+- [消息中间件](/docs/framework/消息中间件.md)
+- [Guava](/docs/framework/Guava.md)
 ### 技术方案
 - [DDD领域驱动](/docs/programme/DDD领域驱动.md)
 - [异地多活](/docs/programme/异地多活.md)
