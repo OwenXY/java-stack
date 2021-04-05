@@ -77,3 +77,202 @@
     - [WebClient](#WebClient)  
     - [EnableReactiveMethodSecurity](#EnableReactiveMethodSecurity)
     - [ReactiveTestSupport](#ReactiveTestSupport)
+    
+
+### 前言
+
+#### 介绍
+
+Spring Security 为基于 Java EE 的企业软件应用程序提供了全面的安全解决方案。
+应用程序安全性的两个主要方面是“**身份验证**”和“**授权**”(或“访问控制”)。
+这是 Spring Security 的两个主要领域。
+“**认证**”是构建委托人的过程，所谓委托人就是他们所宣称的身份(“主要”通常是指可以在您的应用程序中执行操作的用户，设备或其他系统)。
+“**授权**”是指确定的过程是否允许委托人在您的应用程序中执行操作。为了到达需要授权决策的位置，主体的身份已经通过身份验证过程确定。这些概念是通用的，并非完全针对于 Spring Security。
+**源码**
+
+    git clone https://github.com/spring-projects/spring-security.git
+
+
+在身份验证级别，Spring Security 支持多种身份验证模型。
+这些身份验证模型中的大多数要么由第三方提供，要么由相关的标准机构(例如 Internet 工程任务组)开发。
+另外，Spring Security 提供了自己的一组身份验证功能。具体来说，Spring Security 当前支持与所有以下技术的身份验证集成：
+HTTP BASIC 身份验证 Headers(基于 IETF RFC 的标准)
+  - HTTP 摘要验证 Headers(基于 IETF RFC 的标准)
+
+  - HTTP X.509Client 端证书交换(基于 IETF RFC 的标准)
+
+  - LDAP(一种非常常见的跨平台身份验证方法，特别是在大型环境中)
+
+  - 基于表单的身份验证(用于简单的用户界面需求)
+
+  - OpenID authentication
+
+  - 基于预先构建的请求 Headers 的身份验证(例如 Computer Associates Siteminder)
+
+  - Jasig 中央认证服务(也称为 CAS，这是一种流行的开源单点登录系统)
+
+  - 远程方法调用(RMI)和 HttpInvoker(Spring 远程协议)的透明身份验证上下文传播
+
+  - 自动的“记住我”身份验证(因此您可以在方框中打勾，以避免在 sched 的时间段内进行重新身份验证)
+
+  - 匿名身份验证(允许每个未经身份验证的调用自动采用特定的安全身份)
+
+  - 运行身份验证(如果一个调用应以不同的安全身份进行则很有用)
+
+  - Java 身份验证和授权服务(JAAS)
+
+  - Java EE 容器身份验证(因此，如果需要，您仍然可以使用容器 Management 的身份验证)
+
+  - Kerberos
+
+  - Java 开源单一登录(JOSSO)*
+
+  - OpenNMS 网络 Management 平台*
+
+  - AppFuse *
+
+  - AndroMDA *
+
+  - ule 子 ESB *
+
+  - 直接 Web 请求(DWR)*
+
+  - Grails *
+
+  - Tapestry *
+
+  - JTrac *
+
+  - Jasypt *
+
+  - Roller *
+
+  - 弹性路径*
+
+  - Atlassian 人群*
+
+  -您自己的身份验证系统(请参见下文)
+  
+#### 获取SpringSecurity
+Maven用法
+最小的SpringSecurity maven依赖
+```java
+    <dependencies>
+    <!-- ... other dependency elements ... -->
+    <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-web</artifactId>
+        <version>4.2.10.RELEASE</version>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-config</artifactId>
+        <version>4.2.10.RELEASE</version>
+    </dependency>
+    </dependencies>
+
+```
+maven Repositories
+所有的GA版本（即以.RELEASE结尾的版本），均已部署到MavenCentral，因此无需在pom中申明其他maven存储库
+
+如果您使用的是 SNAPSHOT 版本，则需要确保已定义 Spring Snapshot 存储库，如下所示
+
+```java
+<repositories>
+<!-- ... possibly other repository elements ... -->
+<repository>
+	<id>spring-snapshot</id>
+	<name>Spring Snapshot Repository</name>
+	<url>http://repo.spring.io/snapshot</url>
+</repository>
+</repositories>
+
+```
+
+如果您使用的是里程碑版本或候选版本，则需要确保定义了 Spring Milestone 存储库，如下所示：
+```java
+
+<repositories>
+<!-- ... possibly other repository elements ... -->
+<repository>
+	<id>spring-milestone</id>
+	<name>Spring Milestone Repository</name>
+	<url>http://repo.spring.io/milestone</url>
+</repository>
+</repositories>
+```
+Spring Framework Bom
+Spring Security 是基于 Spring Framework 4.3.21.RELEASE 构建的，但应与 4.0.x 一起使用。许多用户将遇到的问题是 Spring Security 的可传递依赖项解决了 Spring Framework 4.3.21RELEASE，这可能会导致奇怪的 Classpath 问题。
+
+解决该问题的一种(乏味的)方法是将所有 Spring Framework 模块包含在 pom 的<dependencyManagement>部分中。另一种方法是将spring-framework-bom包含在pom.xml的<dependencyManagement>部分中，如下所示：
+
+```java
+
+<dependencyManagement>
+	<dependencies>
+	<dependency>
+		<groupId>org.springframework</groupId>
+		<artifactId>spring-framework-bom</artifactId>
+		<version>4.3.21.RELEASE</version>
+		<type>pom</type>
+		<scope>import</scope>
+	</dependency>
+	</dependencies>
+</dependencyManagement>
+```
+
+这将确保 Spring Security 的所有传递依赖项都使用 Spring 4.3.21RELEASE 模块。
+
+Note
+
+    此方法使用 Maven 的“物料 Lists”(BOM)概念，并且仅在 Maven 2.0.9 中可用。有关如何解决依赖关系的其他详细信息，请参见Maven 的依赖机制简介文档。
+
+##### 项目模块
+
+核心包：spring-security-core.jar
+    
+    包含核心身份验证和访问控制类和接口，远程支持和基本配置 API。
+    使用 Spring Security 的任何应用程序都需要。
+    支持独立的应用程序，远程 Client 端，方法(服务层)安全性和 JDBC 用户配置。
+
+远程处理：spring-security-remoting.jar
+
+        提供与 Spring Remoting 的集成。除非您正在编写使用 Spring Remoting 的远程 Client 端，否则您不需要这样做。
+        主要包是org.springframework.security.remoting。
+
+网络：spring-security-web.jar
+
+    包含过滤器和相关的 Web 安全基础结构代码。任何与 servlet API 依赖的东西。
+    如果您需要 Spring Security Web 认证服务和基于 URL 的访问控制，则将需要它。
+    主要包是org.springframework.security.web。
+
+配置：spring-security-config.jar
+
+    包含安全名称空间解析代码和 Java 配置代码。
+    如果您使用 Spring Security XML 名称空间进行配置或 Spring Security 的 Java 配置支持，则需要它。
+    主要包是org.springframework.security.config。这些类都不打算直接在应用程序中使用。
+
+LDAP：spring-security-ldap.jar
+
+    LDAP 身份验证和配置代码。如果您需要使用 LDAP 身份验证或 ManagementLDAP 用户条目，则为必需。
+    顶级软件包是org.springframework.security.ldap。
+
+ACL：spring-security-acl.jar 
+
+    专门的域对象 ACL 实现。用于将安全性应用于应用程序中的特定域对象实例。
+    顶级软件包是org.springframework.security.acls。
+
+CAS：spring-security-cas.jar
+
+    Spring Security 的 CASClient 端集成。
+    如果您想将 Spring Security Web 认证与 CAS 单一登录服务器一起使用。顶级软件包是org.springframework.security.cas。
+
+OpenID：spring-security-openid.jar
+
+    OpenID Web 身份验证支持。
+    用于根据外部 OpenID 服务器对用户进行身份验证。
+    org.springframework.security.openid。需要 OpenID4Java。
+
+测试：spring-security-test.jar
+    
+    支持使用 Spring Security 进行测试。
