@@ -95,8 +95,8 @@
 - [当你输入一个网址的时候，实际会发生什么?](https://mp.weixin.qq.com/s?__biz=MzU0OTk3ODQ3Ng==&mid=2247484257&idx=1&sn=e7704f92a1008ab7a292e2826bd079aa&chksm=fba6eb62ccd1627451d439bbc21e46e6fc1d7bfbe2a431fd887cf974a7bd0d9d482697f0e4fd&mpshare=1&scene=1&srcid=0608mcZB6SlZ2JGY46F7giS3%23rd)
 - [BIO\NIO\Epoll\IO复用](BIO\NIO\Epoll\IO复用.md)
 
-### 计算机网络
-- [IO多路复用分享](/docs/network/IO多路复用.md)
+### 计算机是怎么跑起来的
+- [计算机是怎么跑起来的](/docs/network/计算机是怎么跑起来的.md)
 
 ### 开源框架
 - [spring](/docs/framework/spring.md)
