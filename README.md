@@ -85,18 +85,19 @@
 - [并发编程](/docs/java-core/concurrent.md)
 - [基础](/docs/java-core/base.md)
 ### 计算机网络
-- [IO多路复用分享](/docs/network/IO多路复用.md)
-- [Linux Epoll原理解析](/docs/network/LinuxEpoll原理解析.md)
-- [Socket常见异常](/docs/network/Socket常见异常.md)
-- [TCP有限状态机](/docs/network/TCP有限状态机.md)
-- [计算机网络教材整理](/docs/network/计算机网络教材整理.md)
-- [HTTP2的艺术？](/docs/network/HTTP2的艺术？.md)
-- [HTTPS实践](/docs/network/HTTPS实践.md)
+- [网络是怎么连接的](/docs/computer/网络是怎么连接的.md)
+- [IO多路复用分享](/docs/computer/IO多路复用.md)
+- [Linux Epoll原理解析](/docs/computer/LinuxEpoll原理解析.md)
+- [Socket常见异常](/docs/computer/Socket常见异常.md)
+- [TCP有限状态机](/docs/computer/TCP有限状态机.md)
+- [计算机网络教材整理](/docs/computer/计算机网络教材整理.md)
+- [HTTP2的艺术？](/docs/computer/HTTP2的艺术？.md)
+- [HTTPS实践](/docs/computer/HTTPS实践.md)
 - [当你输入一个网址的时候，实际会发生什么?](https://mp.weixin.qq.com/s?__biz=MzU0OTk3ODQ3Ng==&mid=2247484257&idx=1&sn=e7704f92a1008ab7a292e2826bd079aa&chksm=fba6eb62ccd1627451d439bbc21e46e6fc1d7bfbe2a431fd887cf974a7bd0d9d482697f0e4fd&mpshare=1&scene=1&srcid=0608mcZB6SlZ2JGY46F7giS3%23rd)
 - [BIO\NIO\Epoll\IO复用](BIO\NIO\Epoll\IO复用.md)
 
 ### 计算机是怎么跑起来的
-- [计算机是怎么跑起来的](/docs/network/计算机是怎么跑起来的.md)
+- [计算机是怎么跑起来的](/docs/computer/计算机是怎么跑起来的.md)
 
 ### 开源框架
 - [spring](/docs/framework/spring.md)
