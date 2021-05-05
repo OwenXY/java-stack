@@ -317,3 +317,6 @@ Linux的安装后步骤(https://docs.docker.com/engine/install/linux-postinstall
 
 什么是容器图片？🔗
 运行容器时，它使用隔离的文件系统。此自定义文件系统由容器映像提供。由于该映像包含容器的文件系统，因此它必须包含运行应用程序所需的所有内容-所有依赖项，配置，脚本，二进制文件等。该映像还包含该容器的其他配置，例如环境变量，要运行的默认命令，和其他元数据。？
+
+
+#### cli参考(https://docs.docker.com/engine/reference/run/)
