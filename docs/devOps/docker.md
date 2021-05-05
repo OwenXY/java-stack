@@ -320,3 +320,7 @@ Linux的安装后步骤(https://docs.docker.com/engine/install/linux-postinstall
 
 
 #### cli参考(https://docs.docker.com/engine/reference/run/)
+- docker version(https://docs.docker.com/engine/reference/commandline/version/)
+- docker run(https://docs.docker.com/engine/reference/commandline/run/)
+- docker image(https://docs.docker.com/engine/reference/commandline/image/)
+- docker container(https://docs.docker.com/engine/reference/commandline/container/)
