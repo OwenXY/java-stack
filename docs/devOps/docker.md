@@ -162,4 +162,37 @@ Docker用Go编程语言编写，并利用Linux内核的多种功能来交付其�
 这些名称空间提供了一层隔离。容器的每个方面都在单独的名称空间中运行，并且对其的访问仅限于该名称空间。
 
 ### 获取Docker(https://docs.docker.com/engine/)
-   
+
+### 开始吧
+
+#### 在CentOS上安装Docker Engine (https://docs.docker.com/engine/install/centos/#prerequisites)
+
+**系统要求**：CentOS 7或8
+centos-extras库必须启用。默认情况下，此存储库是启用的
+overlay2建议使用存储驱动程序
+
+**卸载旧版本**
+较旧的Docker版本称为docker或docker-engine。如果已安装这些程序，请卸载它们以及相关的依赖项。
+
+sudo yum remove docker \
+              docker-client \
+              docker-client-latest \
+              docker-common \
+              docker-latest \
+              docker-latest-logrotate \
+              docker-logrotate \
+              docker-engine
+
+如果yum报告未安装这些软件包，则可以。
+
+的内容（/var/lib/docker/包括图像，容器，卷和网络）被保留。Docker Engine软件包现在称为docker-ce。
+
+**安装方法**
+
+您可以根据需要以不同的方式安装Docker Engine：
+
+- 大多数用户会 设置Docker的存储库并从中进行安装，以简化安装和升级任务。这是推荐的方法。
+
+- 一些用户下载并手动安装RPM软件包， 并完全手动管理升级。这在诸如在无法访问互联网的空白系统上安装Docker的情况下很有用。
+
+- 在测试和开发环境中，一些用户选择使用自动 便利脚本来安装Docker。
