@@ -248,3 +248,11 @@ b。通过其完全合格的软件包名称安装特定版本，该软件包名�
 
 sudo yum install docker-ce-<VERSION_STRING> docker-ce-cli-<VERSION_STRING> containerd.io
 Docker已安装但尚未启动。docker创建该组，但没有用户添加到该组。
+
+3.启动Docker。
+
+    sudo systemctl start docker
+
+4.通过运行hello-world 映像来验证是否正确安装了Docker Engine 。
+
+    sudo docker run hello-world

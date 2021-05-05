@@ -6,6 +6,7 @@
     - [5.1新增功能](#5.1新增功能)
     - [获得SpringSecurity](#获得SpringSecurity)
     - [项目模块](#项目模块)
+    - [sampleApplication](#sampleApplication)
 - [servlet应用程序](#servlet应用程序)
     - [java配置](#java配置)
     - [安全命令空间配置](#安全命令空间配置)
@@ -357,3 +358,198 @@ OpenID：spring-security-openid.jar
 测试：spring-security-test.jar
     
     支持使用 Spring Security 进行测试。
+
+
+#### sampleApplication
+
+该项目提供了几个示例 Web 应用程序。
+
+    https://github.com/spring-projects/spring-security.git
+
+教程 samples
+
+    教程 samples 是一个入门的不错的基本示例。它始终使用简单的名称空间配置。编译后的应用程序包含在分发 zip 文件中，可以立即部署到您的 Web 容器(spring-security-samples-tutorial-3.1.x.war)中。 form-based身份验证机制与常用的remember-me身份验证提供程序结合使用，可以使用 cookie 自动记住登录信息。
+    
+    我们建议您从教程示例开始，因为 XML 最少且易于遵循。最重要的是，您可以轻松地将此 XML 文件(及其相应的web.xml条目)添加到现有应用程序中。建议仅在实现这种基本集成时，才尝试添加方法授权或域对象安全性。
+
+Contacts
+
+    联系人示例是一个高级示例，它说明了域对象访问控制列表(ACL)除了基本的应用程序安全性之外，还具有更强大的功能。该应用程序提供了一个界面，用户可以使用该界面来 Management 联系人(域对象)的简单数据库。
+
+    要进行部署，只需将 WAR 文件从 Spring Security 发行版复制到容器的webapps目录中。War 应称为spring-security-samples-contacts-3.1.x.war(附加的版本号将根据您使用的发行版而有所不同)。
+    
+    启动容器后，检查应用程序是否可以加载。访问http://localhost:8080/contacts(或适用于您的 Web 容器和所部署的 WAR 的 URL)。
+    
+    接下来，单击“调试”。系统将提示您进行身份验证，并在该页面上建议一系列用户名和密码。只需使用其中任何一个进行身份验证，然后查看结果页面。它应包含类似于以下内容的成功消息：
+```java
+
+Security Debug Information
+
+Authentication object is of type:
+org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+
+Authentication object as a String:
+
+org.springframew[emailprotected]1f127853:
+Principal: [emailprotected]: Username: rod; \
+Password: [PROTECTED]; Enabled: true; AccountNonExpired: true;
+credentialsNonExpired: true; AccountNonLocked: true; \
+Granted Authorities: ROLE_SUPERVISOR, ROLE_USER; \
+Password: [PROTECTED]; Authenticated: true; \
+Details: org.sprin[emailprotected]0: \
+RemoteIpAddress: 127.0.0.1; SessionId: 8fkp8t83ohar; \
+Granted Authorities: ROLE_SUPERVISOR, ROLE_USER
+
+Authentication object holds the following granted authorities:
+
+ROLE_SUPERVISOR (getAuthority(): ROLE_SUPERVISOR)
+ROLE_USER (getAuthority(): ROLE_USER)
+
+Success! Your web filters appear to be properly configured!
+```
+成功收到上述消息后，请返回示例应用程序的主页，然后单击“Management”。然后，您可以尝试该应用程序。请注意，仅显示当前登录用户可用的联系人，并且只有具有ROLE_SUPERVISOR的用户才有权删除其联系人。在幕后，MethodSecurityInterceptor正在保护业务对象。
+
+该应用程序允许您修改与不同联系人关联的访问控制列表。请务必尝试一下，并通过查看应用程序上下文 XML 文件来了解其工作原理。
+
+LDAP 示例
+
+    LDAP 示例应用程序提供了基本配置，并使用传统 Bean 在同一个应用程序上下文文件中设置了名称空间配置和等效配置。这意味着实际上在此应用程序中配置了两个相同的身份验证提供程序
+
+OpenID 示例
+    
+    OpenID 示例演示了如何使用名称空间配置 OpenID 以及如何为 Google，Yahoo 和 MyOpenID 身份提供程序设置attribute exchange配置(可以根据需要尝试添加其他名称)。它使用基于 JQuery 的openid-selector项目来提供用户友好的登录页面，该页面使用户可以轻松选择提供程序，而无需 Importing 完整的 OpenID 标识符。
+
+    该应用程序与普通身份验证方案的不同之处在于，它允许任何用户访问该站点(前提是他们的 OpenID 身份验证成功)。首次登录时，您将收到“ Welcome [您的名字]”消息。如果您注销并重新登录(使用相同的 OpenID 身份)，则应更改为“ Welcome Back”。这可以通过使用自定义UserDetailsService，它将标准角色分配给任何用户，并将身份存储在内部 Map 中。显然，实际的应用程序将使用数据库来代替。查看源表单中的更多信息。此类还考虑到以下事实：不同的属性可能会从不同的提供者处返回，并构建相应的用户名称。
+
+CASsamples
+
+    CAS 示例要求您同时运行 CAS 服务器和 CASClient 端。它不包含在发行版中，因此您应按照the introduction所述检出项目代码。您将在sample/cas目录下找到相关文件。那里还有一个Readme.txt文件，该文件说明了如何直接从源树运行服务器和 Client 端，并带有 SSL 支持。
+
+JAAS 示例
+
+    JAAS 示例是一个非常简单的示例，说明如何在 Spring Security 中使用 JAAS LoginModule。如果用户名等于密码，则提供的 LoginModule 将成功验证用户身份，否则将引发 LoginException。在此示例中使用的 AuthorityGranter 始终授予角色 ROLE_USER。该示例应用程序还演示了如何通过将jaas-api-provision设置为“ true”来作为 LoginModule 返回的 JAAS 主题来运行。
+
+身份验证前 samples
+
+    此示例应用程序演示了如何从pre-authentication框架连接 bean，以利用 Java EE 容器中的登录信息。用户名和角色是容器设置的用户名和角色。
+
+### servlet应用程序
+
+#### java配置
+
+ 
+第一步是创建我们的 Spring Security Java 配置。该配置将创建一个称为**springSecurityFilterChain的 Servlet 过滤器**，该过滤器负责应用程序中的所有安全性(保护应用程序 URL，验证提交的用户名和密码，重定向到登录表单等)。
+ 
+ ```java
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.context.annotation.*;
+import org.springframework.security.config.annotation.authentication.builders.*;
+import org.springframework.security.config.annotation.web.configuration.*;
+
+@EnableWebSecurity
+public class WebSecurityConfig implements WebMvcConfigurer {
+
+    @Bean
+    public UserDetailsService userDetailsService() throws Exception {
+        InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
+        manager.createUser(User.withDefaultPasswordEncoder().username("user").password("password").roles("USER").build());
+        return manager;
+    }
+}
+```
+
+此配置的确没有太多，但是它做了很多。您可以找到以下功能的摘要：
+
+要求对应用程序中的每个 URL 进行身份验证
+
+为您生成一个登录表单
+
+允许具有 Username * user *和 Password * password *的用户使用基于表单的身份验证进行身份验证
+
+允许用户注销
+
+CSRF attack prevention
+
+Session Fixation protection
+
+安全标题集成
+
+HTTP 严格传输安全安全请求
+
+X-Content-Type-Options integration
+
+缓存控制(以后可以由您的应用程序覆盖以允许缓存您的静态资源)
+
+X-XSS-Protection integration
+
+X-Frame-Options 集成有助于防止Clickjacking
+
+与以下 Servlet API 方法集成
+
+HttpServletRequest#getRemoteUser()
+
+HttpServletRequest.html#getUserPrincipal()
+
+HttpServletRequest.html#isUserInRole(java.lang.String)
+
+HttpServletRequest.html#login(java.lang.String, java.lang.String)
+
+HttpServletRequest.html#logout()
+
+第二步：向 War 注册springSecurityFilterChain
+    
+    可以在 Servlet 3.0 环境中使用Spring 的 WebApplicationInitializer 支持在 Java 配置中完成此操作。毫不奇怪，Spring Security 提供了一个 Base ClassAbstractSecurityWebApplicationInitializer，它将确保springSecurityFilterChain为您注册。使用AbstractSecurityWebApplicationInitializer的方式因我们是否已经在使用 Spring 或 Spring Security 是应用程序中唯一的 Spring 组件而异。
+    
+    第 6.1.2 节“不存在 Spring 的 AbstractSecurityWebApplicationInitializer”-如果您尚未使用 Spring，请按照以下说明进行操作
+    
+    第 6.1.3 节“带有 Spring MVC 的 AbstractSecurityWebApplicationInitializer”-如果您已经在使用 Spring，请按照以下说明进行操作
+
+
+不存在 Spring 的 AbstractSecurityWebApplicationInitializer
+    如果您不使用 Spring 或 Spring MVC，则需要将WebSecurityConfig传递到超类中，以确保配置被接受。您可以在下面找到一个示例
+```java
+    import org.springframework.security.web.context.*;
+    
+public class SecurityWebApplicationInitializer
+    extends AbstractSecurityWebApplicationInitializer {
+
+    public SecurityWebApplicationInitializer() {
+        super(WebSecurityConfig.class);
+    }
+}
+```
+    
+    SecurityWebApplicationInitializer将执行以下操作：
+    
+    为应用程序中的每个 URL 自动注册 springSecurityFilterChain 过滤器
+    
+    添加一个加载WebSecurityConfig的 ContextLoaderListener。
+
+使用 Spring MVC 的 AbstractSecurityWebApplicationInitializer
+
+如果我们在应用程序的其他地方使用 Spring，则可能已经有一个WebApplicationInitializer用来加载 Spring 配置。如果我们使用以前的配置，将会得到一个错误。相反，我们应该使用现有的ApplicationContext注册 Spring Security。例如，如果我们使用 Spring MVC，则SecurityWebApplicationInitializer如下所示：
+```java
+
+import org.springframework.security.web.context.*;
+
+public class SecurityWebApplicationInitializer
+    extends AbstractSecurityWebApplicationInitializer {
+
+}
+```
+这只会为应用程序中的每个 URL 仅注册 springSecurityFilterChain 过滤器。之后，我们将确保WebSecurityConfig已加载到我们现有的 ApplicationInitializer 中。例如，如果我们使用的是 Spring MVC，则将其添加到getRootConfigClasses()
+```java
+public class MvcWebApplicationInitializer extends
+        AbstractAnnotationConfigDispatcherServletInitializer {
+
+    @Override
+    protected Class<?>[] getRootConfigClasses() {
+        return new Class[] { WebSecurityConfig.class };
+    }
+
+    // ... other overrides ...
+}
+```
+
