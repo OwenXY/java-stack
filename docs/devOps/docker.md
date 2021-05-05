@@ -169,7 +169,7 @@ Docker用Go编程语言编写，并利用Linux内核的多种功能来交付其�
 centos-extras库必须启用。默认情况下，此存储库是启用的
 overlay2建议使用存储驱动程序
 
-**卸载旧版本**
+##### 卸载旧版本
 较旧的Docker版本称为docker或docker-engine。如果已安装这些程序，请卸载它们以及相关的依赖项。
 
     sudo yum remove docker \
@@ -185,7 +185,7 @@ overlay2建议使用存储驱动程序
 
 的内容（/var/lib/docker/包括图像，容器，卷和网络）被保留。Docker Engine软件包现在称为docker-ce。
 
-**安装方法**
+##### 安装方法
 
 您可以根据需要以不同的方式安装Docker Engine：
 
@@ -224,7 +224,7 @@ overlay2建议使用存储驱动程序
 了解每晚和测试频道。
 
 
-**安装Docker引擎**
+#####  安装Docker引擎
 
 二选一：
 
@@ -255,7 +255,7 @@ Docker已安装但尚未启动。docker创建该组，但没有用户添加到�
 
     sudo docker run hello-world
 
-升级Docker引擎
+##### 升级Docker引擎
 
 从软件包安装
 
@@ -286,7 +286,7 @@ Docker Engine已安装并正在运行。您需要使用sudo来运行Docker命令
     
     yum -y upgradeyum -y install
 
-卸载Docker
+##### 卸载Docker
 
 1.卸载Docker Engine，CLI和Containerd软件包：
 
@@ -308,3 +308,12 @@ Linux的安装后步骤(https://docs.docker.com/engine/install/linux-postinstall
     docker/getting-started -要使用的图像
     可以组合单个字符标志来缩短完整命令
     docker run -dp 80:80 docker/getting-started
+
+什么是容器？
+
+什么是容器？简而言之，容器只是您计算机上的另一个进程，已与主机上的所有其他进程隔离。这种隔离利用了Linux上已有很长时间的内核名称空间和cgroups。
+
+什么是容器镜像
+
+什么是容器图片？🔗
+运行容器时，它使用隔离的文件系统。此自定义文件系统由容器映像提供。由于该映像包含容器的文件系统，因此它必须包含运行应用程序所需的所有内容-所有依赖项，配置，脚本，二进制文件等。该映像还包含该容器的其他配置，例如环境变量，要运行的默认命令，和其他元数据。？
