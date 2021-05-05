@@ -174,14 +174,14 @@ overlay2建议使用存储驱动程序
 **卸载旧版本**
 较旧的Docker版本称为docker或docker-engine。如果已安装这些程序，请卸载它们以及相关的依赖项。
 
-sudo yum remove docker \
-              docker-client \
-              docker-client-latest \
-              docker-common \
-              docker-latest \
-              docker-latest-logrotate \
-              docker-logrotate \
-              docker-engine
+    sudo yum remove docker \
+                  docker-client \
+                  docker-client-latest \
+                  docker-common \
+                  docker-latest \
+                  docker-latest-logrotate \
+                  docker-logrotate \
+                  docker-engine
 
 如果yum报告未安装这些软件包，则可以。
 
@@ -199,3 +199,52 @@ sudo yum remove docker \
 
 **使用存储库安装**
 
+在新主机上首次安装Docker Engine之前，需要设置Docker存储库。之后，您可以从存储库安装和更新Docker。
+
+**设置存储库**
+
+安装**yum-utils**软件包（提供**yum-config-manager** 实用程序）并设置稳定的存储库
+
+    sudo yum install -y yum-utils
+    sudo yum-config-manager \
+    --add-repo \
+    https://download.docker.com/linux/centos/docker-ce.repo
+
+
+可选：启用每晚或测试存储库。
+
+这些存储库包含在docker.repo上面的文件中，但默认情况下处于禁用状态。您可以在稳定存储库旁边启用它们。以下命令启用每晚存储库。
+
+    sudo yum-config-manager --enable docker-ce-nightly
+
+要启用测试通道，请运行以下命令：
+
+    sudo yum-config-manager --enable docker-ce-test
+您可以通过运行带有标志的命令来禁用每晚或测试存储库 。要重新启用它，请使用该标志。以下命令禁用夜间存储库。yum-config-manager--disable--enable
+
+    sudo yum-config-manager --disable docker-ce-nightly
+了解每晚和测试频道。
+
+
+**安装Docker引擎**
+
+二选一：
+
+1.安装最新版本的Docker Engine和容器，或转到下一步以安装特定版本：
+
+    sudo yum install docker-ce docker-ce-cli containerd.io
+
+Docker已安装但尚未启动。docker创建该组，但没有用户添加到该组。
+
+2.要安装特定版本的Docker Engine，请在存储库中列出可用版本，然后选择并安装：
+
+一种。列出并排序您存储库中可用的版本。本示例按版本号（从高到低）对结果进行排序，并被截断：
+
+    yum list docker-ce --showduplicates | sort -r
+
+返回的列表取决于启用的存储库，并且特定于您的CentOS版本（.el7此示例中的后缀表示）。
+
+b。通过其完全合格的软件包名称安装特定版本，该软件包名称是软件包名称（docker-ce）加上版本字符串（第二列），从第一个冒号（:）到第一个连字符，以连字符（-）分隔。例如，docker-ce-18.09.1。
+
+sudo yum install docker-ce-<VERSION_STRING> docker-ce-cli-<VERSION_STRING> containerd.io
+Docker已安装但尚未启动。docker创建该组，但没有用户添加到该组。
