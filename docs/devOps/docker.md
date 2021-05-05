@@ -300,4 +300,6 @@ Docker Engine已安装并正在运行。您需要使用sudo来运行Docker命令
     sudo rm -rf /var/lib/containerd
 您必须手动删除所有已编辑的配置文件。
 
+Linux的安装后步骤(https://docs.docker.com/engine/install/linux-postinstall/)
+
 
