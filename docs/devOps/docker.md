@@ -256,3 +256,35 @@ Docker已安装但尚未启动。docker创建该组，但没有用户添加到�
 4.通过运行hello-world 映像来验证是否正确安装了Docker Engine 。
 
     sudo docker run hello-world
+
+升级Docker引擎
+
+从软件包安装
+
+1.转到https://download.docker.com/linux/centos/ 并选择您的CentOS版本。然后浏览x86_64/stable/Packages/ 并下载.rpm要安装的Docker版本的文件。
+
+    注意：要安装夜间或测试（预发布）软件包，stable请将上述URL中的单词更改为nightly或test。 了解每晚和测试频道。
+
+2.安装Docker Engine，将下面的路径更改为您下载Docker软件包的路径。
+
+    sudo yum install /path/to/package.rpm
+
+Docker已安装但尚未启动。docker创建该组，但没有用户添加到该组。
+
+3.启动Docker。
+
+    sudo systemctl start docker
+4.通过运行hello-world 映像来验证是否正确安装了Docker Engine 。
+
+    sudo docker run hello-world
+
+此命令下载测试图像并在容器中运行它。容器运行时，它会打印参考消息并退出。
+
+Docker Engine已安装并正在运行。您需要使用sudo来运行Docker命令。继续执行Linux的安装后步骤，以允许非特权用户运行Docker命令以及其他可选配置步骤。
+
+升级Docker引擎
+
+要升级Docker Engine，请下载更新的软件包文件，并使用 代替重复 安装过程，并指向新文件。
+    
+    yum -y upgradeyum -y install
+
