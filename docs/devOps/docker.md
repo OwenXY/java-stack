@@ -288,3 +288,16 @@ Docker Engine已安装并正在运行。您需要使用sudo来运行Docker命令
     
     yum -y upgradeyum -y install
 
+卸载Docker
+
+1.卸载Docker Engine，CLI和Containerd软件包：
+
+    sudo yum remove docker-ce docker-ce-cli containerd.io
+
+2,主机上的映像，容器，卷或自定义配置文件不会自动删除。要删除所有图像，容器和卷：
+
+    sudo rm -rf /var/lib/docker
+    sudo rm -rf /var/lib/containerd
+您必须手动删除所有已编辑的配置文件。
+
+
