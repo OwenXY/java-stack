@@ -163,8 +163,6 @@ Docker用Go编程语言编写，并利用Linux内核的多种功能来交付其�
 
 ### 获取Docker(https://docs.docker.com/engine/)
 
-### 开始吧
-
 #### 在CentOS上安装Docker Engine (https://docs.docker.com/engine/install/centos/#prerequisites)
 
 **系统要求**：CentOS 7或8
@@ -302,4 +300,11 @@ Docker Engine已安装并正在运行。您需要使用sudo来运行Docker命令
 
 Linux的安装后步骤(https://docs.docker.com/engine/install/linux-postinstall/)
 
+### 开始吧
 
+    docker run -d -p 80:80 docker/getting-started
+    -d -以分离模式运行容器（在后台）
+    -p 80:80 -将主机的端口80映射到容器中的端口80
+    docker/getting-started -要使用的图像
+    可以组合单个字符标志来缩短完整命令
+    docker run -dp 80:80 docker/getting-started
