@@ -284,7 +284,7 @@ Docker Engine已安装并正在运行。您需要使用sudo来运行Docker命令
 
 要升级Docker Engine，请下载更新的软件包文件，并使用 代替重复 安装过程，并指向新文件。
     
-    yum -y upgradeyum -y install
+    yum -y upgrade yum -y install
 
 ##### 卸载Docker
 
@@ -299,6 +299,56 @@ Docker Engine已安装并正在运行。您需要使用sudo来运行Docker命令
 您必须手动删除所有已编辑的配置文件。
 
 Linux的安装后步骤(https://docs.docker.com/engine/install/linux-postinstall/)
+
+##### 以非root用户管理Docker
+
+Docker守护程序绑定到Unix套接字而不是TCP端口。**默认情况下，Unix套接字由用户拥有root，其他用户只能使用来访问它sudo**。Docker守护程序始终以root用户身份运行。
+
+**如果您不想在docker命令前添加sudo，请创建一个Unix组docker，并将其添加用户。**Docker守护程序启动时，它会创建一个可由该docker组成员访问的Unix套接字。
+
+注意事项：
+
+要在没有root特权的情况下运行Docker，请参阅 以非root用户身份运行Docker守护程序（无根模式）（https://docs.docker.com/engine/security/rootless/）。
+
+###### 要创建docker组并添加您的用户，请执行以下操作
+
+1.创建docker组。
+
+     sudo groupadd docker
+
+2.将您的用户添加到该docker组。
+
+    sudo usermod -aG docker $USER
+
+3.注销并重新登录，以便重新评估您的组成员身份。
+
+如果在虚拟机上进行测试，则可能需要重新启动虚拟机以使更改生效。
+
+在台式机Linux环境（例如X Windows）上，完全注销会话，然后重新登录。
+
+在Linux上，您还可以运行以下命令来激活对组的更改
+
+       newgrp docker
+
+4.确认您可以docker不带命令行运行命令sudo。
+
+     docker run hello-world
+
+###### 配置Docker以在启动时启动
+
+当前大多数Linux发行版（RHEL，CentOS，Fedora，Debian，Ubuntu 16.04及更高版本）用于systemd管理系统引导时启动的服务。在Debian和Ubuntu上，默认情况下，将Docker服务配置为在引导时启动。要在启动时自动启动其他发行版的Docker和Containerd，请使用以下命令：
+
+    sudo systemctl enable docker.service
+    sudo systemctl enable containerd.service
+
+若要禁用此行为，请disable改用。
+
+    sudo systemctl disable docker.service
+    sudo systemctl disable containerd.service
+
+如果需要添加HTTP代理，为Docker运行时文件设置不同的目录或分区，或进行其他自定义，请参阅 自定义系统的Docker守护程序选项。
+
+
 
 ### 开始吧
 
