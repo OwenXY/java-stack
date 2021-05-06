@@ -457,3 +457,53 @@ Docker可以通过阅读Docker中的指令来自动构建映像 Dockerfile。A D
 **警告**
 
     不要将根目录/用作PATH构建上下文，因为它会导致构建将硬盘驱动器的全部内容传输到Docker守护程序。
+
+以使用-f标志withdocker build指向文件系统中任何位置的Dockerfile。
+
+    docker build -f /path/to/a/Dockerfile .
+
+如果构建成功，则可以指定存储新映像的存储库和标记：
+
+    docker build -t shykes/myapp .
+
+要在构建后将映像标记到多个存储库中，请在-t运行build命令时添加多个参数：
+
+    docker build -t shykes/myapp:1.0.2 -t shykes/myapp:latest .
+
+默认情况下，构建缓存基于要构建的计算机上先前构建的结果。该--cache-from选项还允许您使用通过映像注册表分发的构建缓存，请参考命令参考 中的“ 指定外部缓存源”部分docker build。
+
+完成构建后，您就可以考虑使用扫描映像docker scan并将其推送到Docker Hub了。
+
+##### DockerFile 格式
+
+    # Comment
+    INSTRUCTION arguments
+该指令不区分大小写。但是，惯例是将它们大写以更轻松地将它们与参数区分开。
+
+DockerDockerfile按顺序运行指令。
+一个Dockerfile
+必须以**开始FROM的指令**。
+
+    这可能在解析器指令，注释和全局范围的 ARG之后。该FROM指令指定要从中构建父图像。FROM只能在一个或多个ARG指令之前，这些指令声明在中的FROM行中使用的参数Dockerfile。
+
+docker以#作为注释，  
+    除非该行是一个有效的解析器指令。#一行中其他任何地方的标记都被视为参数。这允许如下语句  注释中不支持换行符。
+
+    # Comment
+    RUN echo 'we are running some # of cool things'
+
+解析器指令
+解析器指令是可选的，并且会影响Dockerfile处理a中后续行的方式。解析器指令不会在构建中添加图层，也不会显示为构建步骤。
+解析器指令以形式写为特殊类型的注释**# directive=value**。单个指令只能使用一次。
+
+处理完注释，空行或生成器指令后，Docker不再寻找解析器指令。而是将格式化为解析器指令的任何内容都视为注释，并且不会尝试验证它是否可能是解析器指令。因此，所有解析器指令必须位于的最顶部Dockerfile。
+
+解析器指令不区分大小写。但是，约定是小写的。约定还应在任何解析器指令之后包含一个空白行。解析器指令不支持行继续符。
+
+自定义Dockerfile实现使您能够：
+
+自动获取错误修正，而无需更新Docker守护程序
+确保所有用户都使用相同的实现来构建您的Dockerfile
+使用最新功能而无需更新Docker守护程序
+在将新功能或第三方功能集成到Docker守护程序中之前，先对其进行尝试
+使用替代的构建定义，或创建自己的构建定义
