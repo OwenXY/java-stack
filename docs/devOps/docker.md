@@ -507,3 +507,21 @@ docker以#作为注释，
 使用最新功能而无需更新Docker守护程序
 在将新功能或第三方功能集成到Docker守护程序中之前，先对其进行尝试
 使用替代的构建定义，或创建自己的构建定义
+
+
+##### 编写Dockerfile的最佳实践
+
+Docker映像由只读层组成，每个只读层代表一个Dockerfile指令。这些层是堆叠的，每个层都是与上一层相比变化的增量。感受一下Dockerfile：
+
+    # syntax=docker/dockerfile:1
+    FROM ubuntu:18.04
+    COPY . /app
+    RUN make /app
+    CMD python /app/app.py
+
+每条指令创建一层：
+
+- FROM从ubuntu:18.04Docker映像创建一个图层。
+- COPY 从Docker客户端的当前目录添加文件。
+- RUN使用构建您的应用程序make。
+- CMD 指定在容器中运行什么命令。
