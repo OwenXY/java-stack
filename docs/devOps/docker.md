@@ -438,3 +438,18 @@ Command	Description
 - docker version	显示Docker版本信息
 - docker volume	管理卷
 - docker wait	Block 阻塞直到一个或多个容器停止，然后打印其退出代码
+
+
+#### DockerFile
+
+Docker可以通过阅读Docker中的指令来自动构建映像 Dockerfile。A Dockerfile是一个文本文档，其中包含用户可以在命令行上调用以组装图像的所有命令。
+
+使用docker build 用户可以创建自动构建，该构建连续执行多个命令行指令。
+
+本页描述您可以在中使用的命令Dockerfile。阅读完此页面后，请参考Dockerfile最佳实践以获取有关技巧的指南
+
+构建上下文是递归处理的。因此，aPATH包括任何子目录，并且a包括URL存储库及其子模块。本示例显示了一个使用当前目录（.）作为构建上下文的构建命令：
+
+    docker build .
+
+构建是由Docker守护程序而不是CLI运行的。构建过程要做的第一件事是将整个上下文（递归）发送到守护程序。在大多数情况下，最好从空目录开始作为上下文，并将Dockerfile保留在该目录中。仅添加构建Dockerfile所需的文件。
