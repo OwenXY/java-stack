@@ -118,8 +118,8 @@
 - [高并发与高可用](/docs/programme/高并发与高可用.md)
 - [链路追踪](/docs/programme/链路追踪.md)
 ### 数据库
-- [mysql](/docs/programme/mysql.md)
-- [redis](/docs/programme/redis.md)
+- [mysql](/docs/db/mysql.md)
+- [redis](/docs/db/redis.md)
 ### 微服务
 - [分布式服务治理](/docs/springcloud/分布式服务治理.md)
 - [分布式服务架构](/docs/springcloud/分布式服务架构.md)    
