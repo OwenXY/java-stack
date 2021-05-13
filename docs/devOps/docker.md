@@ -963,9 +963,12 @@ ENTRYPOINT [”j ava ”,”-Djava.security.egd=file:/dev/ /urandom”,” jar�
 </plugins >
 </build>
 pom.xml 中指定了以下属性
+
+
 镜像的名称，此处为 registry.aliyuncs.com/linhuatest/gs-spring-bootdocker 其中 registry.aliyuncs com 是阿里云镜像仓库的域名， linhuatest 是用
 户的命名空间， gs-spring-boot-docker 是用户某个仓库的名称，此处没有镜像
 tag ，默认为 latest;
+
 Dockerfi 文件所在的目录，该目录可以理解为 Docker le context ，保存 Docker
 依赖的资源；
 口将何种资源拷贝到 Dockerfile 文件所在的目录，即 cont ext 中，此处用户只需要编
