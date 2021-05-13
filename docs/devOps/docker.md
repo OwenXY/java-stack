@@ -613,3 +613,149 @@ docker container update
 
 
 #### 訪問dockers倉庫
+
+仓库（Repository ）是集中存放镜像的地方，又分公共仓库和私有仓库
+有时候容易把仓库与注册服务器（ Regis盯）混淆 实际上 册服务器是存放仓库的具
+体服务器， 个注册服务器上可以有多个仓库，而每个仓库下面可以有多个镜像 从这方面
+来说，仓库可以被认为是一个具体的项目或目录 例如对于仓库地址 private-docker.
+com/ubuntu 来说， private-docker.com 是注册服务器地址， ubuntu 是仓库名
+
+登录
+
+docker login 命令来输入用户名和密码
+
+基本操作
+
+docker search 来查找官方账户中的镜像
+
+docker pull 来将它下载到本地
+
+自动创建
+要配置自动创建，包括如下的步骤：
+1 ）创建并登录 Docker Hub ，以及目标网站如 Github;
+）在目标网站中允许 Docker Hub 访问服务；
+）在 Docker Hub 中配置一个“自动创建”类型的项目；
+）选取一个目标网站中的项目（需要含 Dockerfile ）和分支；
+5 ）指定 Dockerfile 的位置，并提交创建
+之后，可以在 Docker Hub 的“自动创建”页面中跟踪每次创建的状态
+
+第三方镜像市场
+
+搭建本地的私有仓库
+
+安装docker 之后可以通过官方的registry镜像来搭建一套本地私有仓库环境
+
+docker run -d -p 5000:5000 registry:2
+
+这将自动下载并启动一个registry的容器，创建本地的私有仓库服务
+
+默认情况下，仓库会被创建在容器/var/lib/registry目录下
+可以通过 -v 参数来将镜像文件存放在本地指定路径
+
+$ docker run -d -p 5000 5000 -v /opt / data /registry:/var/lib/registry registry : 2
+此时－， 在本地将启动一个私有仓库服务，监听端口为 5000
+
+
+#### docker 数据管理
+在生产环境中使用docker ，往往要对数据进行持久化，或者需要在多个容器之间进行数据共享，这就必然涉及数据管理操作
+
+容器中的数据管理主要有两种方式：
+1.数据卷：容器内数据直接映射到本地主机环境
+2.数据卷容器：使用特定容器维护数据卷
+
+##### 数据卷
+
+数据卷 Data Volumes 个可供容器使用的特殊目录，它将主机操作系统目录直接
+映射进容器，类似于 Linux 中的 mou 行为
+数据卷可以提供很多有用的特性
+口数据卷可以在容器之间共事和重用，容器间传递数据将变得高效与方便；
+口对数据卷内数据的修改会立马生效，无论是容器内操作还是本地操作；
+口对数据卷的更新不会影响镜像，解摘开应用和数据
+  卷会一直存在 ，直到没有容器使用，可以安 地卸载它
+
+###### 创建数据卷
+docker 提供了 volume 子命令来管理数据卷
+
+      docker volume create  -d loacl test
+      此时可以查看/var/lib/docker/volumes路径下，会发现所 建的数据卷位置
+
+##### 绑定数据卷
+除了使用 vo lume 子命令来管理数据卷外，还可以在创建容器时将主 地的任意路径
+挂载到容器内作为数据卷，这种形式创建的数据卷称为绑定数据卷
+
+    在用 docker [container] ru口命令的时候，可以使用 mount 选项来使用数据卷
+    mount 项支持三种类型的数据卷，包括
+    D volume 普通数据卷，映射到主机／var/ lib /docke /vo lumes 径下；
+    bind ：绑定数据卷，映射到主机指定路径下；
+    D tmpfs ：临时数据卷，只存在于内存中
+    下面使用 training/webapp 镜像创建 Web 容器，并创建 个数据卷挂载到容器
+    的／ opt/webapp 目录：
+    $ docker run d P -name web mount type=bind,source=/webapp,destination=/opt/
+    webapp tra ng/webapp python app.py
+    上述命令等同于使用旧的 标记可以在容器内创建一个数据卷：
+    $ docker run - d - P --name web - v /webapp: /opt/webapp training/webapp python app.py
+    这个功能在进行应用测试的时候十分方便，比如用户可以放置一些程序或数据到本地目
+    录中实时进行更新，然后在容器 运行和使用
+    另外，本地目录的路径必须是绝对路径，容器内路径可以为相对路径 如果目录不存
+    在， Docke 会自动创建
+    Docker 载数据卷的默认权限是读写（ rw ，用户也可以 ro 定为只读
+    $ docker ru且－ -P --name web -v /webapp: /opt/webapp:ro training/webapp python app.py
+    加了： ro 之后，容器内对所挂载数据卷内的数据就无法修改了
+    如果直接挂载一个文件到容器，使用文件编辑工具，包括 vi 或者 sed - - in place
+    的时候，可能会造成文件 in ode 的改 Docker 1.1.0 起，这会导致报错误信息 所以推
+    方式是直接挂载文 所在的目录到容器内。
+
+
+##### 数据卷容器
+
+如果用户需要在多个容器之间共享一些持续更新的数据，最简单的方式时使用数据卷容器
+    首先，创建一个数据卷容器 dbdata 并在其中创建一个数据卷挂载到／dbdata
+    $ docker run it -v /dbdata ame dbdata ubuntu
+    
+    然后，可以在其他容器中使用－－ volumes-from 来挂载 dbdata 容器中的数据卷，例
+    如创建 dbl db2 两个容器，并从 dbdata 容器挂载数据卷：
+    $ docker run -it --volumes-from dbdata -name dbl ubuntu
+    $ docker run -it --volumes-from dbdata －口ame db2 ubuntu
+    如果删除了挂载的容器（包括 dbdata db 工和 db2 ），数据卷并不会被自动删除 如果
+    删除一个数据卷，必须在删除最后一个还挂载着它的容器时显式使用 docker rm -v
+    令来指定同时删除关联的容器
+    使用数据卷容器可以让用户在容器之间自由地升级和移动数据卷，具体的操作将在下
+    节进行讲解
+
+##### 端口映射实现容器访问
+1.从外部访问容器应用
+在启动容器的时候，如果不指定对应参数，在容器外部是无法通过网络来访问容器内的
+网络应用和服务的
+当容器中运行 些网络应用，要让外部访问这些应用时，可以通过－ 或－ 参数来指
+定端口映射 当使用－ （大写的）标记时， Docker 会随机映射一个 49000 49900 的端口
+到内部容器开放的网络端口：
+
+-p 小写的）则可以指定要映射的端口，并且，在一个指定端口上只可以绑定一个容器
+
+2. 映射所有接口地址
+   使用 HostPort:ContainerPort 格式本地的 5000 端口映射到容器的 5000 端口，
+   可以执行如下命令：
+   $ docker run -d -p 5000:5000 training/webapp python app.py
+   此时 认会绑定本地所有 口上的所有地址 多次使用－ 记可以绑定多个端口 例如：
+   $docker run -d -p 5000 : 5000 -p 3000:80 training/webapp python app.py
+   映射到指定地址的指定端口
+   可以使用 IP:HostPort:ContainerPort 格式指定映射使用一个特定地址，比如
+   localhost 地址 127 .0.0. 1:
+   $ docker run -d -p 127 0 0 1:5000:5000 training/webapp python app.py
+4. 映射到指定地址的任意端口
+   使用 IP: :ContainerPort 绑定 localhost 的任意端口到容器的 5000 端口，本地主机
+   会自动分配一个端口：
+   docker run d p 127 O O 1::5000 training/webapp python app.py
+   还可以使用 udp 标记来指定 udp 端口：
+   $docker run -d -p 127.0.0.1:5000 5000/udp training/webapp pytho app.py
+5. 查看映射端口配置
+   使用 docker port 查看当前映射的端口配置， 也可以查看到绑定的地址：
+   e Rd nu nu CM o
+   --- e m o r a 9 •
+   L o S p04 rQJ nRd
+   :
+   qv1A d7 0· k· r·
+   m.墨容器有自己的内部网络和 IP 地址，使用 docker [container) inspect 容器
+- ID 可以获取容器的具体信息
+
+#### 使用dockerFile创建镜像
