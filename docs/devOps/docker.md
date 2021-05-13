@@ -380,168 +380,236 @@ Docker提供了通过一系列日志记录驱动程序从主机上运行的所�
 - docker image(https://docs.docker.com/engine/reference/commandline/image/)
 - docker container(https://docs.docker.com/engine/reference/commandline/container/)
 
-Command	Description
-- docker attach	将本地标准输入，输出和错误流附加到正在运行的容器
-- docker build	从Dockerfile构建映像
-- docker builder	管理构建
-- docker checkpoint	管理检查点
-- docker commit	根据容器的更改创建新图像
-- docker config	管理Docker配置
-- docker container	管理容器
-- docker context	管理上下文
-- docker cp	在容器和本地文件系统之间复制文件/文件夹
-- docker create	创建一个新的容器
-- docker diff	检查容器文件系统上文件或目录的更改
-- docker events	从服务器获取实时事件
-- docker exec	在正在运行的容器中运行命令
-- docker export	将容器的文件系统导出为tar存档
-- docker history	显示图像的历史记录
-- docker image	管理图片
-- docker images	列出图片
-- docker import	从tarball导入内容以创建文件系统映像
-- docker info	显示系统范围的信息
-- docker inspect	返回有关Docker对象的低级信息
-- docker kill	杀死一个或多个正在运行的容器
-- docker load 从tar存档或STDIN加载图像
-- docker login	登录Docker注册表
-- docker logout	从Docker注册表注销
-- docker logs	获取容器的日志
-- docker manifest	管理Docker映像清单和清单清单
-- docker network	管理网络
-- docker node	管理Swarm节点
-- docker pause	暂停一个或多个容器中的所有进程
-- docker plugin	管理插件
-- docker port 列出端口映射或容器的特定映射
-- docker ps	列出容器
-- docker pull 从注册表中提取图像或存储库
-- docker push	将映像或存储库推送到注册表
-- docker rename	重命名容器
-- docker restart	重新启动一个或多个容器
-- docker rm	删除一个或多个容器
-- docker rmi	删除一个或多个图像
-- docker run	在新容器中运行命令
-- docker save	将一个或多个图像保存到tar存档（默认情况下流式传输到STDOUT）
-- docker search	在Docker Hub中搜索图像
-- docker secret	管理Docker机密
-- docker service	管理服务
-- docker stack	管理Docker堆栈
-- docker start	启动一个或多个已停止的容器
-- docker stats	显示容器资源使用情况统计信息的实时流
-- docker stop	停止一个或多个运行中的容器
-- docker swarm	管理群
-- docker system	管理Docker
-- docker tag	创建一个引用了SOURCE_IMAGE的标签TARGET_IMAGE
-- docker top	显示容器的运行过程
-- docker trust	管理对Docker映像的信任
-- docker unpause	取消暂停一个或多个容器中的所有进程
-- docker update	更新一个或多个容器的配置
-- docker version	显示Docker版本信息
-- docker volume	管理卷
-- docker wait	Block 阻塞直到一个或多个容器停止，然后打印其退出代码
+#### 使用docker镜像
+
+##### 获取镜像
+
+      docker image	管理镜像
+      docker image ls 列出镜像
+      docker images	列出镜像
+
+         
+##### 删除镜像  
+
+        docker rmi	删除一个或多个镜像
+        docker rmi redis：lastest
+        docker rmi [id]
+        docker rmi -f 强制删除，通常不建议使用 -f
+        正确的做法是先删除该镜像的所有容器，在删除镜像
 
 
-#### DockerFile
+##### 清理镜像
 
-Docker可以通过阅读Docker中的指令来自动构建映像 Dockerfile。A Dockerfile是一个文本文档，其中包含用户可以在命令行上调用以组装图像的所有命令。
+          docker image prune 清理镜像
+              docker image   prune -a 删除所有无用的镜像，不光是临时镜像
+              docker image   prune           -filter 之清理符合过滤器的镜像
+              docker image   prune       -f ，-force：强制删除镜像，而不进行确认提示
 
-使用docker build 用户可以创建自动构建，该构建连续执行多个命令行指令。
+ ##### 创建镜像   
+创建镜像的犯法有三种：基于已有镜像的容器创建，基于本地模板导入，基于DockerFile创建
+  
+1.基于已有容器创建
 
-本页描述您可以在中使用的命令Dockerfile。阅读完此页面后，请参考Dockerfile最佳实践以获取有关技巧的指南
+    docker [container] commit
 
-构建上下文是递归处理的。因此，aPATH包括任何子目录，并且a包括URL存储库及其子模块。本示例显示了一个使用当前目录（.）作为构建上下文的构建命令：
+    命令格式为 docker [container] commit [OPTIONS] CONTAINER [REPOSITORY
+    [:TAG ］］，主要选项包括：
+    口－ a, --author＝”’ ：作者信息；
+    口－ c, - -change ＝［］： 提交的时候执行 Dockerfile 令，包括 CMDIENTRYPOINTIE
+    IEXPOSEILABELIONBUILDIUSERIVOLUMEIWORKDIR 等；
+    口－m, --message ＝＂＂：提交消息
+    口－ p, - -pause=true 提交时暂停容器运行
 
-    docker build .
+2.基于本地模板导入
 
-构建是由Docker守护程序而不是CLI运行的。构建过程要做的第一件事是将整个上下文（递归）发送到守护程序。在大多数情况下，最好从空目录开始作为上下文，并将Dockerfile保留在该目录中。仅添加构建Dockerfile所需的文件。
+用户也可以直接从 个操作系统模板文件导人 个镜像，
+主要使用 docker [container] import 
+命令 命令格式为 docker [image] import [OPTIONS] filelURLl -[REPOSITORY
+[:TAG] ]
 
-**警告**
+3.基于Dockerfile创建
 
-    不要将根目录/用作PATH构建上下文，因为它会导致构建将硬盘驱动器的全部内容传输到Docker守护程序。
+基于 docker file 创建是最常见的方式 Dockerfile 个文本文件，利用给定的指
+述基于某个父镜像创建新镜像的过程
 
-以使用-f标志withdocker build指向文件系统中任何位置的Dockerfile。
+##### 存入和载入镜像
 
-    docker build -f /path/to/a/Dockerfile .
+Docker 镜像的 save load 子命令 用户可以使用 oc er [image ]
+save 和docker [image ] load 命令来存出和载人镜像
 
-如果构建成功，则可以指定存储新映像的存储库和标记：
+存入镜像
 
-    docker build -t shykes/myapp .
+    docker save -o redis.tar redis:latest 将 redis镜像保存为文件 redis.tar 
 
-要在构建后将映像标记到多个存储库中，请在-t运行build命令时添加多个参数：
+载入镜像
 
-    docker build -t shykes/myapp:1.0.2 -t shykes/myapp:latest .
+    docker load -i 
 
-默认情况下，构建缓存基于要构建的计算机上先前构建的结果。该--cache-from选项还允许您使用通过映像注册表分发的构建缓存，请参考命令参考 中的“ 指定外部缓存源”部分docker build。
+##### 上传镜像
+  
+      docker pull上传到镜像仓具，默认上传到Docker Hub 官方仓库
 
-完成构建后，您就可以考虑使用扫描映像docker scan并将其推送到Docker Hub了。
+用户在 Docker Hub 网站注册后可以上传自制的镜像
+例如，用户 user 上传本地的 test :latest 镜像，可以先添加新的标签 user/
+test:latest 然后 docker [image ] push 令上传镜像
 
-##### DockerFile 格式
+$ docker tag test:latest user/test : latest
+$ docker push user/test:latest
+The push refers to a repository [docker.io/user/test]
 
-    # Comment
-    INSTRUCTION arguments
-该指令不区分大小写。但是，惯例是将它们大写以更轻松地将它们与参数区分开。
+#### 使用docker容器
+容器是 Docker 的另一个核心概念 简单来说，容器是镜像的一个运行实例。所不同的
+是，镜像是静态的只读文件，而容器带有运行时需要的可写文件层，同时，容器中的应用进
+程处于运行状态
+如果认为虚拟机是模拟运行的一整套操作系统（包括内核 应用运行态环境和其他系统
+环境）和跑在上面的应用 那么 Docker 容器就是独立运行的一个（或一组）应用，以及它们
+必需的运行环境
 
-DockerDockerfile按顺序运行指令。
-一个Dockerfile
-必须以**开始FROM的指令**。
+##### 创建容器
 
-    这可能在解析器指令，注释和全局范围的 ARG之后。该FROM指令指定要从中构建父图像。FROM只能在一个或多个ARG指令之前，这些指令声明在中的FROM行中使用的参数Dockerfile。
-
-docker以#作为注释，  
-    除非该行是一个有效的解析器指令。#一行中其他任何地方的标记都被视为参数。这允许如下语句  注释中不支持换行符。
-
-    # Comment
-    RUN echo 'we are running some # of cool things'
-
-解析器指令
-解析器指令是可选的，并且会影响Dockerfile处理a中后续行的方式。解析器指令不会在构建中添加图层，也不会显示为构建步骤。
-解析器指令以形式写为特殊类型的注释**# directive=value**。单个指令只能使用一次。
-
-处理完注释，空行或生成器指令后，Docker不再寻找解析器指令。而是将格式化为解析器指令的任何内容都视为注释，并且不会尝试验证它是否可能是解析器指令。因此，所有解析器指令必须位于的最顶部Dockerfile。
-
-解析器指令不区分大小写。但是，约定是小写的。约定还应在任何解析器指令之后包含一个空白行。解析器指令不支持行继续符。
-
-自定义Dockerfile实现使您能够：
-
-自动获取错误修正，而无需更新Docker守护程序
-确保所有用户都使用相同的实现来构建您的Dockerfile
-使用最新功能而无需更新Docker守护程序
-在将新功能或第三方功能集成到Docker守护程序中之前，先对其进行尝试
-使用替代的构建定义，或创建自己的构建定义
-
-
-##### 编写Dockerfile的最佳实践
-
-Docker映像由只读层组成，每个只读层代表一个Dockerfile指令。这些层是堆叠的，每个层都是与上一层相比变化的增量。感受一下Dockerfile：
-
-    # syntax=docker/dockerfile:1
-    FROM ubuntu:18.04
-    COPY . /app
-    RUN make /app
-    CMD python /app/app.py
-
-每条指令创建一层：
-
-- FROM从ubuntu:18.04Docker映像创建一个图层。
-- COPY 从Docker客户端的当前目录添加文件。
-- RUN使用构建您的应用程序make。
-- CMD 指定在容器中运行什么命令。
+      docker [container] create 命令创建一个容器
+      
+      docker create -it redis:latest
+      使用 docker [container] create 命令新建的容器处于停止状态，可以使用 docker
+      [container] start 命令来启动它
 
 
-运行图像并生成容器时，可以 在基础层之上添加一个新的可写层（“**容器层**”）。对运行中的容器所做的所有更改（例如写入新文件，修改现有文件和删除文件）都将写入此薄可写容器层。
+##### 启动容器
 
-有关图像层（以及Docker如何构建和存储图像）的更多信息，请参阅 关于存储驱动程序。
+    使用 docker [container] start 来启动 个已经创建的容器
 
-一般准则和建议
+    docker start 
 
-您定义的图片Dockerfile应生成尽可能短暂的容器。“短暂”是指可以停止并销毁容器，然后对其进行重建和替换，并采用绝对的最低限度的设置和配置。
+##### 新建并启动容器
+      
+    docker run  等价于 docker create + docker start
+
+    docker run -it ubuntu:lB .04 /bin/bash
+    当利用 docker [container] run 来创建并启动容器时， Docker 在后台运行的标准
+    操作包括：
+    口检查本地是否存在指定的镜像，不存在就从公有仓库下载；
+    口利用镜像创建一个容器，并启动该容器；
+    口分配 个文件系统给容器，并在只读的镜像层外面挂载一层可读写层
+    口从宿主主机配置的网桥接口中桥接一个虚拟接口到容器中去；
+    口从网桥的地址池配置一个 IP 地址给容器；
+    口执行用户指定的应用程序；
+    口执行完毕后容器被自动终止
+  
+守護進程運行
+  docker run -d
+
+##### 查看容器數據
+
+    docker logs
+              该命令支持的选项包括：
+        口－ details 打印详细信息；
+        口－ f, follo ：持续保持输出；
+        口一 since string ：输出从某个时间开始的日志；
+        口－ tail string 输出最近的若干日志；
+        口－ t, timestamps 显示时间戳信息
+        口－until string 输出某个时间之前的日
+
+##### 停止容器
+    暫停容器：docker pause 容器
+    恢復容器：docker unpause 容器
+
+##### 終止容器
+
+    docker stop 
+
+##### 進入容器
+
+1.attach
+attach 是docker自帶的命令
+然而使用 attach 命令有时候并不方便 当多个窗口同时 attach 到同一个容器的时
+候，所有窗口都会同步显示；当某个窗口因命令阻塞时，其他窗口也无法执行操作了
+
+2.exec命令
+docker1.3.0之後，docker提供了更加方便地工具exec命令，可以在容器中執行任何命令
+该命令的基本格式为：
+
+      docker [container] exec [-di -detach] [ detach-keys[;[]]] [-il--interactive]
+      [ - -pii vileged］卜ti 町， tty] [ u I user (;USER]] CONTAINER COMMAND ［阻 . . . ]
+      比较重要的参数有：
+      重操作 Docker 窑器 •！• 47
+      口－ d, --detach 在容器中后台执行命令；
+      口－－ detach-keys ＝＂＂：指定将容器切回后台的按键；
+      口－ e, - - env= ［）：指定环境变量列表
+      口－ i, --interactive=true I false ：打开标准输入接受用户输入命令， 默认值为
+      false;
+      口－－ privileged=trueifalse 是否给执行命令以高权限，默认值为 false;
+      口－ t, --tty=trueifalse 分配伪终端，默认值为 false;
+      口－ u, --user ＝＂＂：执行命令的用户名或 ID
+例如，进入到刚创建的容器中，并启动一个 bash:
+docker exec -it 24 3c32535da7 / bin/ bash
+可以看到会打开一个新的 bash 终端，在不影响容器内其他应用的前提下，用户可以与
+容器进行交五
+
+通过指定 it 参数来保持标准输入打开，并 且分配 一个伪终端 通过 ec 命令对
+容器执行操作是最为推荐的方式
 
 
-##### 为java创建
+##### 刪除容器
 
-为应用程序创建Dockerfile的步骤。在工作目录的根目录中，创建一个名为的Dockerfile文件，然后在文本编辑器中打开该文件。
+docker rm  容器
+    
+    口－ f, --force=false 是否强行终止并删除一个运行中的容器
+    口－ 1, --link=false ：删除容器的连接 ，但保留容器；
+    口－ v, --volumes=false ：删除容器挂载的数据卷
 
-Dockerfile的名称并不重要，但是许多命令的默认文件名都是Dockerfile。因此，在本系列中，我们将其用作文件名
+##### 導入和到處容器
+導出
+
+    docker [container) export [-ol - -output [=””) ) CONTAINER
+    docker export - o test for run.tar ce5
+
+導入
+
+    docker import [-cl--change[=[]]] [-ml --message[=MESSAGE]] filelURLI-
+    [REPOSITORY [:TAG]]
+
+     docker import test_for_run.tar - test/ubuntu:vl.O
+
+实际上，既可以使用 docker load 命令来导入镜像存储文件到本地镜像库，也可以使
+docker [container] import 命令来导入一个容器快照到本地镜像库 这两者的区
+别在于 容器快照文件将丢弃所有的历史记录和元数据信息（即仅保存容器当时的快照状态），
+而镜像存储文件将保存完整记录，体积更大 此外，从容器快照文件导人时可以重新指定标
+签等元数据信息
 
 
+##### 查看容器
+1.查看容器詳情
+
+    docker container inspect
+    ocker container inspect test
+2.查看容器進程
+
+docker top test
+
+3.查看統計信息
+
+    查看统计信息可以使用 docker [container] stats [OPTIONS] [CONTAINER ... ]
+    子命令，会显示 CPU 、内存、存储、网络等使用情况的统计信息
+    支持选项包括
+    口－ a, -all ：输出所有容器统计信息，默认仅在运行中；
+    口－ format string ：格式化输出信息；
+    口－ no-stream ：不持续输出，默认会自动更新持续实时结果；
+    口－ no-trunc ：不截断输出信息
+    例如，查看当前运行中容器的系统资
+
+##### 其他容器命令
+1.複製文件
+  docker cp
+
+2.查看更變
+  docker container diff
+
+3.查看端口映射
+
+docker container import
+
+4.更換配置
+docker container update
 
 
+#### 訪問dockers倉庫
