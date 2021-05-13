@@ -826,3 +826,155 @@ ENTRYPOINT command param 1 param2: shell 中执行
    
 ##### 创建镜像
 docker build
+
+
+
+#### 编程开发
+
+14.2 Java
+Java 是一种跨平台、面向对象、泛型编程的编译型语言，广泛应用于企业级
+应用开发和移动应用开发领域，由 SUN 公司在 1995 年推出 Java 是基于类的面
+向对象的高级语言，其设计理念是尽可能地减少部署依赖，致力于允许 Java 应用
+的开发者“开发一次，到处运行” 这就意味着 Java 的二进制编码不需要再次编
+译，即可运行在异构的口础上 Java 在大型互联网项目，特别是互联网金融和
+电子商务项目中非常受欢迎 OpenJDK (Open Java Development Kit）是免费开源的
+« ~~
+Java· Java 平台，支持 Java SE( Standard Edition Java 开始， OpenJDK 就是官方的 Java SE 环境
+使用官方镜像
+在容器中运行 Java 代码最简单的方法就是将 Java 编译指令直接写人 Dockerfile ，然后使
+用此 Dockerfile 构建并运行此镜像，即可启动程序。具体步骤如下
+首先，从官方仓库获取某版本 Java 基础镜像：
+$ docker pull java:7
+然后，在本地新建一个空目录，在其中创建 Dockerfile 文件 Dockerfile 中，加入需
+要执行的 Java 编译命令，例如：
+FROM openjdk:7
+COPY . /usr/src/javaapp
+WORKDIR /usr/src/ javaapp
+RUN javac HelloWorld . java
+CMD ["java ”,”HelloWorld"]
+如果我们希望使用最新的 Java 10 ，可以修改基础镜像为 FROM ope dk: 10 下面我
+们继续使用此 Dockerfile 构建镜 ava-image:
+$ docker build -t java-image
+Successfully built 406d480c8fde
+可以通过 docker images 指令查看生成的镜像：
+$ docker mages
+REPOSITORY TAG IMAGE ID CREATED VIRTUAL SIZE
+java- image latest 406d480c8fde 56 seconds ago 587.7 MB
+然后，运行此镜像即自动编译程序并执行：
+$ docker run -it --rm --name java-container java-image
+Hello, World
+如果只需要容器中编译 Java 程序，而不需要运行， 则可以使用如下命
+$ docker ru口－－ rm -v "$ (pwd )”:/usr/src/javaapp -w /usr/src/javaapp java:7 javac
+HelloWorld. j ava
+以上命令会将当前目录（“$ (pwd ）”）挂载为容器的工作目录，并执行 avac Hello
+14 章编 程开 ·：· 147
+World . j ava 令编译 Hell oWor ld.ja 码，然后生成的 He lloWor ld cla ss
+文件至当前目录下：
+$ ls -la
+total 24
+drwxr-xr-x 5 f axi staff 170 Feb 2 12:35
+drwxr-xr-x 3 f axi staff 102 Feb 2 11 :52
+” rw-r -r-- 1 faxi staff 114 Feb 2 12:01 Dockerfile
+-rw-r--r-- 1 faxi staff 426 Feb 2 12:29 HelloWorld.class
+-rw-r--r-- 1 faxi staff 182 Feb 2 11:59 HelloWorld.java
+2. 关于 Spring Boot
+   Spring Boot 是由 ivotal 团队开发的框架，其设计目的是用
+   来简化新 Spring 应用的初始搭建以及开发过程 该框架使用了特
+   定的方式进行配置，从而使开发人员不再需要定义样板化的配
+   Spring Boot 致力于在蓬勃发展的快速应用开发领域成为领导者
+   翠盟国
+   Spring Boot 项目旨在简化创建产品级的 pring 应用和服务，通过它来选择不同的 Spring
+   平台 可创建独立的 Java 应用和 Web 应用，同时提供了命令行工具来支持 spring scripts
+   14-1 显示 pring Boot Spring 生态中的位置
+   14-1 Spring 生态
+   Spring Boot 特性包括：
+   口创建独立 Spring 应用；
+   口内嵌 Tomcat, Je即或 Undertow （无须部署 WAR 文件）；
+   口提供 starter POM ，简化 Maven 配置；
+   口尽可能地实现 Spring 项目配置自动化；
+   口提供工业级特性 metr ，健康检查等；
+   口不生成代码，不需 XML 配置
+   148 音盼实战案例
+   下面介绍如何使用 compose 来搭建 Spring Boot 应用，环境要求是 JDKl 或以上版本，
+   Maven3.0 或以上版本
+   第一步 建一个 pring Boot 应用
+   首先，下载并解压 pring Boot 应用模板代码：
+   git clone https : //github .com/ spring-guides/gs-spring-boot-docker.git ’
+   ' cd gs-spring-boot-docker
+   然后，编辑代码文件 rc main/java/h llo Application.java ，内容如下：
+   package hello;
+   mport org.springframework.boot.SpringApplication;
+   import org.springframework.boot.autoconfigure.SpringBootApplication;
+   import org.springframework.boot.bind.RelaxedPropertyResolver;
+   import org.springframework.web.bind .annotation.RequestMapping;
+   import org springframework .web.b ind.annotat on.RestController
+   { o E
+   n-
+-
+ate 4la ot
+-- 
+--ip
+rp
+p‘
+eA
+D&
+14
+@@SRU peb rsl go Bnc otl ora tos Als
+P
+@RequestMapping (”/ ”)
+public String home() {
+return ”Hello Docker World ”,
+public static void main(String[] args) {
+SpringApplication.run (Applicat on.class, args);
+Spri gBootApplication RestController 注解表示 Java pplication
+经准备好被 spring MVC 所调用，并提供 HTTP 服务 注解＠RequestMapping （＇『／＇『） 表示
+context path ”的请求路由到方法 ome 中进行处理， main 方法中的 SpringApplication
+run （）用来启动 Spring Boot 应用。
+二步 ，容器化 Spring Boot 应用
+首先，新建 src /main docker Dockerfile ，内容如下
+FROM java:8
+VOLUME / tmp
+ADD gs-spring-boot-docker-0 .1. o .jar app. jar
+RUN bash -c ’ touch /app.jar'
+ENTRYPOINT [”j ava ”,”-Djava.security.egd=file:/dev/ /urandom”,” jar”,”/ app. jar"]
+然后，使用 docker-maven-plug 建镜像， pom.xml 文件内容如下：
+<properties >
+<docker.image.prefix>registry.aliyuncs com/l nhuatest</docker.image.pref X>
+</propert es> 口户」咱－－←」
+14 章编程开发 •！• 149
+<bui ld>
+<plug ins>
+<plugin>
+<groupid>com.spotify</groupid>
+<artifactid>docker-maven-plugin</artifactid>
+<version>0.2 3</version>
+<conf igurat Oil>
+<imageName>${docker . image.prefix}/${project . artifactid}</imageName>
+<dockerDirectory>src/main /docker</dockerDirectory>
+<resources>
+<resource>
+<targetPath>/</targetPath>
+<directory>${pro ject.build .directory}</d rectory
+〈工 nclude>${pro ject build .finalName} .jar</include>
+</resource>
+</resources>
+</configuration>
+</plugin>
+</plugins >
+</build>
+pom.xml 中指定了以下属性
+镜像的名称，此处为 registry.aliyuncs.com/linhuatest/gs-spring-bootdocker 其中 registry.aliyuncs com 是阿里云镜像仓库的域名， linhuatest 是用
+户的命名空间， gs-spring-boot-docker 是用户某个仓库的名称，此处没有镜像
+tag ，默认为 latest;
+Dockerfi 文件所在的目录，该目录可以理解为 Docker le context ，保存 Docker
+依赖的资源；
+口将何种资源拷贝到 Dockerfile 文件所在的目录，即 cont ext 中，此处用户只需要编
+译出来的 jar 文件
+最后，可以构建和推送镜像到任何一个镜像仓库，如下所
+$ mvn package docker:bu ld ＃此处必须要有 docker 客户端连接到 docker daemon 方能构建
+$ docker push springio/gs-spring-boot-docker
+3. 相关资
+   Java Spring Boot 的相关资源如下
+   Java 官方镜像 https :/ registry.hub.docker.co java/
+   Java 官方镜像标 https: //reg is .hub.docker.corn/_/java/tags/manage/
+   Spring Boot 官网： http: //projects.spring.io/spring-boo t/
