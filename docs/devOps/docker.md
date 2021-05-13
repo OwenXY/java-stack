@@ -759,3 +759,70 @@ docker 提供了 volume 子命令来管理数据卷
 - ID 可以获取容器的具体信息
 
 #### 使用dockerFile创建镜像
+Dockerfile 是一个文本格式的配 文件，用户可以使用 Dockerfile 来’快速创建自定义的镜像
+
+##### 基本结构
+
+DockerFile由一行行命令语句组成，并且支持以# 开头的注释行
+一般而言DockerFile主体部分分为四个部分：基础镜像信息，维护者信息，镜像操作指令，容器启动时执行指令
+
+##### 指令说明
+
+Dockerfile 中指令的一般格式为 INSTRUCTION arguments ，包括“配置指令”（配置
+镜像信息）和“操作指令”（
+![img.png](images/peizhizhiling.png)
+![img_1.png](images/caozuozhiling.png)
+
+配置指令
+
+1. ARG定义 建镜像过程中使用的变量。
+   格式为 ARG <name>[=<default value ＞］ 
+   
+2.FROM
+   指定所创建镜像的基础镜像
+   格式为 FROM < image > [AS ame ＞］或 FROM < image >: <tag> [AS ＜口ame>]
+   FROM < image >®< digest > [AS ＜丑 me ＞］
+   任何 Dockerfile 中第 条指令必须为 ROM 并且，如果在同一个 Dockerfile 中创
+   建多个镜像时，可以使用多个 FROM 指令（每个镜像一次）
+
+3.LABEL
+LABEL 指令可以为生成的镜像添加元数据标签信息 这些信息可 以用来辅助过滤出特
+定镜像
+格式为 LAB EL <key>=<value> <key> = <value> <key>=<va lue> ..
+4. EXPOSE
+   声明镜像内服务监听的端口
+   格式为 EXPOSE <port> [<port>/<protocol> ...
+
+   注意该指令只是起到声明作用，并不会自动完成端口映射
+   如果要映射端口出来，在启动容器时可以使用 参数（Docker 主机会自动分配 个宿主
+   机的临时端口）或－ HOST PORT:CONTAINER PORT 参数（具体指定所映射的本地端口）
+   
+5. ENV
+指定环境变 ，在镜像生成过程中会被后续 RUN 令使用 ，在镜像启动的容器中也会存在
+格式为 ENV <key> <value ＞或 ENV <key>=<value>
+
+6 .ENTRYPOINT
+指定镜像的默认人口命令，该入口命令会在启动容器时作为根命令执行，所有传人值作
+为该命令的参数
+支持两种格式
+ENTRYPOINT [”executable”J’paraml”,”param2”]: ex巳c 调用执行；
+ENTRYPOINT command param 1 param2: shell 中执行
+此时， CMD 令指定值将作为根 令的参数
+每个 Dockerfile 只能有一个 ENTRYPOINT ，当指定多个时，只有最后一个起效
+
+7. VOLUME
+
+创建 个数据卷挂载点
+格式为 VOLUME [ 11/data11
+运行容器时可以从本地主机或其他容器挂载数据卷，一般用来存放数据库和需要保持的
+数据等
+
+8. USER
+
+指定运行容器时的用户名或 urn ，后续的 RUN 等指令 使用指定的用户身份
+
+9. WORKDIR为后续的 RUN CMD ENTRYPO INT 指令配置工作目录
+   格式为 WORKDIR path /to/workd ir
+   
+##### 创建镜像
+docker build
