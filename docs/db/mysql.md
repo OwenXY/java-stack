@@ -183,17 +183,18 @@ IO相关压测性指标
     sudo yum -y install sysbench
     sysbench --version
     如果上⾯可以看到sysbench的版本号，就说明安装成功了
-QPS：Query Per Second，每秒可以处理多少个请求，也就是说这个数据库每秒可以处理多少个sql
 
-TPS：Transaction Per Second 。其实就是每秒可处理的事物
+    QPS：Query Per Second，每秒可以处理多少个请求，也就是说这个数据库每秒可以处理多少个sql
+    
+    TPS：Transaction Per Second 。其实就是每秒可处理的事物
 
 #### 如何为生产环境中的数据库部署监控系统
 
-Prometheus：其实就是一个监控数据采集和存储系统，它可以利用采用缉拿空数据采集组件从你指定的Mysql数据库中采集他需要的监控数据
-然后他自己由一个时序数据库，他会把采集道德监控数据放到自己的时序数据库中，本质就是存储在磁盘文件里。
-
-Grafana：就是一个可视化的监控数据展示系统，他可以Prometheus采集到的大量mysql监控数据展示成各种精美报告，可以让我们直接看到mysql的监控情况。
-
+    Prometheus：其实就是一个监控数据采集和存储系统，它可以利用采用缉拿空数据采集组件从你指定的Mysql数据库中采集他需要的监控数据
+    然后他自己由一个时序数据库，他会把采集道德监控数据放到自己的时序数据库中，本质就是存储在磁盘文件里。
+    
+    Grafana：就是一个可视化的监控数据展示系统，他可以Prometheus采集到的大量mysql监控数据展示成各种精美报告，可以让我们直接看到mysql的监控情况。
+    
 
 
 
