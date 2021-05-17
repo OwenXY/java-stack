@@ -173,11 +173,7 @@ IO相关压测性指标
       
 #### 如何对生产环境中的数据库进行360度无死角压测？（https://apppukyptrl1086.pc.xiaoe-tech.com/detail/i_5e383c5357307_MjhluwMb/1?from=p_5e0c2a35dbbc9_MNDGDYba&type=6）
 
-
-
-非常好的数据库压测工具 sysbench
-
-##### 在linux 安装sysbench
+在linux 安装sysbench
 
     curl -s https://packagecloud.io/install/repositories/akopytov/sysbench/script.rpm.sh | sudo bash
     sudo yum -y install sysbench
@@ -188,7 +184,7 @@ IO相关压测性指标
     
     TPS：Transaction Per Second 。其实就是每秒可处理的事物
 
-#### 如何为生产环境中的数据库部署监控系统
+如何为生产环境中的数据库部署监控系统
 
     Prometheus：其实就是一个监控数据采集和存储系统，它可以利用采用缉拿空数据采集组件从你指定的Mysql数据库中采集他需要的监控数据
     然后他自己由一个时序数据库，他会把采集道德监控数据放到自己的时序数据库中，本质就是存储在磁盘文件里。
