@@ -256,3 +256,11 @@ IO相关压测性指标
 所以在生产实践中设置多个Buffer Pool 来优化高并发访问的性能，是mysql一个很重要的优化技巧。
 
 #### 如何通过chunk来支持数据库运行期间的Buffer Pool动态调整
+
+
+实际上Buffer Pool是由很多个chuck组成的，他的大小是innodb_buffer_pool_chunk_size 来控制的默认值是128M
+
+
+所以实际上我们可以做一个假设，比如现在我们给Buffer Pool 设置一个总大小是8GB，然后4个Buffer Pool ，那么每个Buffer Pool 就是2GB
+ 此时每个Buffer Pool 是由一系列的128M chuck组成的，也就是说每个Buffer Pool 会有16个chuck，然后每个Buffer Pool里的每个chuck里就是一系列
+数据描述和缓存页，每个Buffer Pool里的多个chuck共享一套 free flush lru lianbiao 
