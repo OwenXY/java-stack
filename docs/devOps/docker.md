@@ -541,7 +541,7 @@ docker1.3.0之後，docker提供了更加方便地工具exec命令，可以在�
       口－ t, --tty=trueifalse 分配伪终端，默认值为 false;
       口－ u, --user ＝＂＂：执行命令的用户名或 ID
 例如，进入到刚创建的容器中，并启动一个 bash:
-docker exec -it 24 3c32535da7 / bin/ bash
+docker exec -it 243c32535da7 /bin/bash
 可以看到会打开一个新的 bash 终端，在不影响容器内其他应用的前提下，用户可以与
 容器进行交五
 

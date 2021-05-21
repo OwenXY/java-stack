@@ -5,6 +5,7 @@
     - [mysql架构设计](#mysql架构设计)
     - [InnoDB存储引擎的架构设计](#InnoDB存储引擎的架构设计)
       - [buffer pool](#buffer pool)
+    - [Mysql物理数据模型](#Mysql物理数据模型)
 - [生产实践](#生产实践)
     - [真实生产环境下的数据库机器配置如何规划？](#真实生产环境下的数据库机器配置如何规划？)
     - [互联网公司的生产环境数据库是如何进行性能测试的？](#互联网公司的生产环境数据库是如何进行性能测试的？？)
@@ -176,6 +177,9 @@ LRU链表的热数据区域是如何进行优化的？
 
     第二个时机，这个后台线程同时也会在Mysql不怎么繁忙的时候，找个时间把flush链表中的缓存页刷入磁盘，这样被你修改过的数据迟早都会刷入磁盘。
 
+#### Mysql物理数据模型
+
+
 
 ### 生产实践
 
@@ -269,3 +273,12 @@ IO相关压测性指标
 所以实际上我们可以做一个假设，比如现在我们给Buffer Pool 设置一个总大小是8GB，然后4个Buffer Pool ，那么每个Buffer Pool 就是2GB
  此时每个Buffer Pool 是由一系列的128M chuck组成的，也就是说每个Buffer Pool 会有16个chuck，然后每个Buffer Pool里的每个chuck里就是一系列
 数据描述和缓存页，每个Buffer Pool里的多个chuck共享一套 free flush lru lianbiao 
+
+
+#### 在生产环境中，如何基于机器配置来合理设置Buffer Pool
+
+Buffer Pool 的大小一般设置为机器大小的50-60%
+
+确定了Buffer pool 的总大小之后，就得考虑设置多少个buffer pool以及chuck 
+
+一般来说： buffer pool总大小 =  （chuck大小 * buffer pool数量）的倍数
