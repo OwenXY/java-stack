@@ -5,6 +5,7 @@
     - [mysql架构设计](#mysql架构设计)
     - [InnoDB存储引擎的架构设计](#InnoDB存储引擎的架构设计)
       - [buffer pool](#buffer pool)
+      - [redo log](#redo log)
     - [mysql数据模型](#mysql数据模型)
       - [VARCHAR这种变长字段，在磁盘上到底是如何存储的](#VARCHAR这种变长字段，在磁盘上到底是如何存储的)
       - [一行数据中的多个NULL字段值在磁盘上怎么存储？](#一行数据中的多个NULL字段值在磁盘上怎么存储？)
@@ -184,7 +185,46 @@ LRU链表的热数据区域是如何进行优化的？
 
     第二个时机，这个后台线程同时也会在Mysql不怎么繁忙的时候，找个时间把flush链表中的缓存页刷入磁盘，这样被你修改过的数据迟早都会刷入磁盘。
 
+#### redo log
 
+redo log:在事务提交成功之后，保存一条日志记录，防止机器宕机导致数据丢失。顺序写，性能高。
+
+redo log长什么样？
+
+    redo log里面记录的就是：**表空间号+数据页号+偏移量+修改了几个字节的值+具体的值**
+    
+    修改了几个字节的值，redo log就划分了不同的类型，MLOG_1BYTE:就是修改了一个字节的值，以此类推
+    但是如果你修改了一大串的值，类型就是MLOG_WRITE_STRING,就是代表你一下子在那个数据页的某个偏移量位置插入或者修改了一大串的值
+    
+    日志类型(就是类似MLOG_1BYTE)，表空间号，数据页号，数据页中的偏移量。具体修改的数据
+    
+redo log写磁盘的过程
+
+    其实mysql内有另外一个数据结构，叫做 redo log block
+    一个 redo log block是512字节，这个redo log block字节分为三个部分
+    一个是12字节的header块头，一个是496字节的body块体，一个是4字节trailer块尾
+    在这里面，12个字节的header投又分为4个部分：
+        1.包括4个字节的block no，就是块唯一编码
+        2.2个字节的data length，就是block里写入了多个字节数据；
+        3.2个字节的first record group ，这个是说每个事务都会有多个redo log ，一个是redo log group，另一组redo log。那么在这个block里的第一组redo log的偏移量，就是这两个字节存储的；
+        4.4个字节的checkpoint on
+![img.png](image/redolog.png)
+
+redo log block 与磁盘文件的关系
+
+![img.png](image/redo_log_block2.png)
+    
+平时我们执行完增删改之后，要写入磁盘的redo log，其实应该是先进入到redo log block这个数据结构里，然后再进入磁盘文件
+
+redo log buffer 类似申请出一块连续的空间，然后里面划分出N多个空的redo log block
+
+通过设置mysql的innodb_log_buffer_size可以指定这个redo log buffer的大小，默认也就是16MB
+
+![img_1.png](redo_log_block3.png)
+
+##### redo log buffer
+
+redo log buffer
 
 ### mysql物理存储
 
