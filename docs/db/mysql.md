@@ -6,13 +6,25 @@
     - [InnoDB存储引擎的架构设计](#InnoDB存储引擎的架构设计)
       - [buffer pool](#buffer pool)
       - [redo log](#redo log)
+      - [undo log](#undo log)
+    - [事务](#事务)
+      - [多事务并发更新或者查询的数据问题](#多事务并发更新或者查询的数据问题)
+        - [脏写](#脏写)
+        - [脏读](#脏读)
+        - [不可重复读](#不可重复读)
+        - [幻读](#幻读)
+      - [SQl对事务的四种隔离级别](#SQl对事务的四种隔离级别)
+        - [read uncommitted](#读未提交)
+        - [read committed](#读已提交)
+        - [repeatable](#可重复读)
+        - [serializable](#串行化)
     - [mysql数据模型](#mysql数据模型)
       - [VARCHAR这种变长字段，在磁盘上到底是如何存储的](#VARCHAR这种变长字段，在磁盘上到底是如何存储的)
       - [一行数据中的多个NULL字段值在磁盘上怎么存储？](#一行数据中的多个NULL字段值在磁盘上怎么存储？)
       - [磁盘文件中40个bit位的数据头以及真实数据是如何存储的？](#磁盘文件中40个bit位的数据头以及真实数据是如何存储的？)
       - [行溢出](#行溢出)        
       - [表空间](#表空间)
-
+    
 - [生产实践](#生产实践)
     - [真实生产环境下的数据库机器配置如何规划？](#真实生产环境下的数据库机器配置如何规划？)
     - [互联网公司的生产环境数据库是如何进行性能测试的？](#互联网公司的生产环境数据库是如何进行性能测试的？？)
@@ -220,7 +232,7 @@ redo log buffer 类似申请出一块连续的空间，然后里面划分出N多
 
 通过设置mysql的innodb_log_buffer_size可以指定这个redo log buffer的大小，默认也就是16MB
 
-![img_1.png](redo_log_block3.png)
+![img_1.png](image/redo_log_block3.png)
 
 redo log buffer中的缓冲日志，到底是什么时候写入磁盘的？
     
@@ -234,9 +246,84 @@ redo log buffer中的缓冲日志，到底是什么时候写入磁盘的？
     （3）后台线程定时刷新，有一个后台线程每隔1秒就会把redo log buffer里的redo log block刷到磁盘文件里去
     （4）MySQL关闭的时候，redo log block都会刷入到磁盘里去
 
-##### redo log buffer
 
-redo log buffer
+redo log占用磁盘越来越大怎么办？
+
+实际上默认情况下，redo log都会写入到一个目录中文件按里，这个目录可以通过
+    
+    show variables like 'datadir'
+可以通过修改
+        
+    innodb_log_group_home_dir
+
+参数来设置redo log这个目录
+
+指定每个redo log文件的大小，默认是48M
+
+    innodb_log_file_size
+
+指定日志文件的数量
+
+    innodb_log_file_in_group
+
+
+![img.png](image/redologsetting.png)
+
+#### undo log
+
+INSERT 语句的undo log 类型是TRX_UNDO_INSERT_REC ，这个undo log里包含了一下的东西：
+
+        1.这条日志的开始位置
+        2.主键的各列长度和值
+        3.表idx
+        4.undo log 日志编号
+        5.undo log 日志类型
+        6.这条日志的结束位置
+        
+![img.png](image/undolog.png)
+
+
+现在事务要是回滚，直接从undo log 日志中拿出这个id，找到对应的数据删掉
+
+
+
+### 事务
+
+#### 多事务并发更新或者查询的数据问题
+
+多个事务要是对缓存页里的同一条数据同时进行更新或者查询，此时会产生哪些问题？
+    
+      实际上会设计到脏读，脏写，不可重复读，幻读
+
+脏写
+
+    事务B修改了事务A修改过的值，此时事务A还没提交，所以事务A随时会回滚，导致事务B修改过的值也没了
+
+   ![img.png](image/zangxie.png)
+
+脏读
+
+    事务B查询了事务A修改过的数据，但是此时事务A还没有提交，所以事务A随时回滚，导致事务B再次查询就读不到事务A修改的数据了
+
+![img.png](image/zangdu.png)
+
+
+其實一句话总结：
+
+    无论是脏写还是脏读，都是因为一个事务去更新或者查询了另外一个还没有提交的事务更新过的数据
+        
+    因为另外一个事务还没提交，所以他随时可能反悔回滚，那么必然导致你更新的数据没了，或者你之前查询到的数据就没了，这种就是脏读和脏写。
+
+
+
+不可重复读
+
+       针对已经提交的事务修改的值，被你的事务给读到了，你的事务多次查询，多次读到的是别人已经提交事务
+       修改过的值，导致每次查询的值不一样
+
+![img_1.png](image/bukechongfudu.png)
+
+幻读
 
 ### mysql物理存储
 
