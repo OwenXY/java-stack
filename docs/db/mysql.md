@@ -18,6 +18,9 @@
         - [read committed](#读已提交)
         - [repeatable](#可重复读)
         - [serializable](#串行化)
+      - [透彻剖析Mysql的MVCC事务隔离机制](#透彻剖析Mysql的MVCC事务隔离机制)
+        - [undo log版本链](#undo log版本链)
+        - [ReadView机制](#ReadView机制)
     - [mysql数据模型](#mysql数据模型)
       - [VARCHAR这种变长字段，在磁盘上到底是如何存储的](#VARCHAR这种变长字段，在磁盘上到底是如何存储的)
       - [一行数据中的多个NULL字段值在磁盘上怎么存储？](#一行数据中的多个NULL字段值在磁盘上怎么存储？)
@@ -353,13 +356,35 @@ SQL标准中滚定了4种事务隔离级别，并不是Mysql的事务隔离级�
 
      这种隔离级别，根本不允许你多个事务并发执行，只能串起来执行
 
-##### 读未提交
+#### spring对事务的支持
 
-##### 读已提交
+在@Transaction(isolation =isolation.DEFAULT),默认是default，表示数据库是什么就是什么
+isolation.READ_UNCOMMITTED
+isolation.READ_COMMITTED
+isolation.REPEATABLE_READ
+isolation.SERIALIZABLE
 
-##### 可重复读
+#### 透彻剖析Mysql的MVCC事务隔离机制
 
-##### 串行化
+##### undo log版本链
+
+    我们每条数据其实都有两个隐藏字段，一个是trx_id,一个是roll_pointer ，這個trx_id就是最近一次更新过这条数据的事务id，roll_pointer
+    就是指向你了你更新这个事务之前生成的undo log。
+    所以不管多个事务并发执行时如何执行的，起码先搞清楚一点，就是多个事务串行执行的时候，每个人修改了一行数据，都会更新隐藏字段
+    trx_id和roll_pointer，同时之前多个数据快照对应的undo log，会通过roll_pointer指针串联起来，形成一个很重要的版本链
+
+##### ReadView机制(https://apppukyptrl1086.pc.xiaoe-tech.com/detail/i_5e86040203a20_GmWrGMJe/1?from=p_5e0c2a35dbbc9_MNDGDYba&type=6)
+
+在执行事务的时候，就会生成一个ReadView，里面比较重要的东西有四个
+
+1.一个是m_ids，这个就是说此时有哪些事务在mysql里执行还没有提交的
+2.一个是min_trx_id，就是m_ids里最小的值；
+3.一个是max_trx_id,这是说mysql下一个要生成的事务id，就是最大的事务id
+4.一个是create_trx_id，就是你这个事务的id
+
+![img.png](image/ReadViewjizhi.png)
+
+多个事务并发执行的时候，readView m_ids,放的就是所有事务的id
 
 
 ### mysql物理存储
