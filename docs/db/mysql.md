@@ -21,6 +21,9 @@
       - [透彻剖析Mysql的MVCC事务隔离机制](#透彻剖析Mysql的MVCC事务隔离机制)
         - [undo log版本链](#undo log版本链)
         - [ReadView机制](#ReadView机制)
+        - [Read Committed隔离级别是如何基于ReadView机制实现的？](#Read Committed隔离级别是如何基于ReadView机制实现的？)
+        - [MySQL最牛的RR隔离级别，是如何基于ReadView机制实现的？](#MySQL最牛的RR隔离级别，是如何基于ReadView机制实现的？)
+      - [多个事务更新同一行数据时，是如何加锁避免脏写的？](#多个事务更新同一行数据时，是如何加锁避免脏写的？)
     - [mysql数据模型](#mysql数据模型)
       - [VARCHAR这种变长字段，在磁盘上到底是如何存储的](#VARCHAR这种变长字段，在磁盘上到底是如何存储的)
       - [一行数据中的多个NULL字段值在磁盘上怎么存储？](#一行数据中的多个NULL字段值在磁盘上怎么存储？)
@@ -390,7 +393,24 @@ isolation.SERIALIZABLE
     开启之前，就有别的事务正在运行，然后你事务开启之后 ，别的事务更新了值，你是绝对读不到的！或者是你事务开
     启之后，比你晚开启的事务更新了值，你也是读不到的！
 
+##### Read Committed隔离级别是如何基于ReadView机制实现的？
 
+    每次查询都生成新的ReadView，那么如果 在你这次查询之前，有事务修改了数据还提交了，你这次查询生成的ReadView里，那个m_ids列表当然不包含这个已
+    经提交的事务了，既然不包含已经提交的事务了，那么当然可以读到人家修改过的值了。
+    这就是基于ReadView实现RC隔离级别的原理，实际上，基于undo log多版本链条以及
+    ReadView机制实现的多事务并发执行的RC隔离级别、RR隔离级别，就是数据库的MVCC多版本并发控制机制。
+
+##### MySQL最牛的RR隔离级别，是如何基于ReadView机制实现的？
+
+默认的ReadView 就是这个机制
+
+
+#### 多个事务更新同一行数据时，是如何加锁避免脏写的？
+加锁
+
+![img.png](image/jiasuo.png)
+
+释放锁-加锁![img.png](image/shifangsuojiasuo.png)
 
 ### mysql物理存储
 
