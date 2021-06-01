@@ -1,36 +1,39 @@
 # mysql
+
 ## 目录
 
 - [mysql基础架构](#mysql基础架构)
     - [mysql架构设计](#mysql架构设计)
     - [InnoDB存储引擎的架构设计](#InnoDB存储引擎的架构设计)
-      - [buffer pool](#buffer pool)
-      - [redo log](#redo log)
-      - [undo log](#undo log)
+        - [buffer pool](#buffer pool)
+        - [redo log](#redo log)
+        - [undo log](#undo log)
     - [事务](#事务)
-      - [多事务并发更新或者查询的数据问题](#多事务并发更新或者查询的数据问题)
-        - [脏写](#脏写)
-        - [脏读](#脏读)
-        - [不可重复读](#不可重复读)
-        - [幻读](#幻读)
-      - [SQl对事务的四种隔离级别](#SQL标准中对事务的4个隔离级别)
-        - [read uncommitted](#读未提交)
-        - [read committed](#读已提交)
-        - [repeatable](#可重复读)
-        - [serializable](#串行化)
-      - [透彻剖析Mysql的MVCC事务隔离机制](#透彻剖析Mysql的MVCC事务隔离机制)
-        - [undo log版本链](#undo log版本链)
-        - [ReadView机制](#ReadView机制)
-        - [Read Committed隔离级别是如何基于ReadView机制实现的？](#Read Committed隔离级别是如何基于ReadView机制实现的？)
-        - [MySQL最牛的RR隔离级别，是如何基于ReadView机制实现的？](#MySQL最牛的RR隔离级别，是如何基于ReadView机制实现的？)
-      - [多个事务更新同一行数据时，是如何加锁避免脏写的？](#多个事务更新同一行数据时，是如何加锁避免脏写的？)
+        - [多事务并发更新或者查询的数据问题](#多事务并发更新或者查询的数据问题)
+            - [脏写](#脏写)
+            - [脏读](#脏读)
+            - [不可重复读](#不可重复读)
+            - [幻读](#幻读)
+        - [SQl对事务的四种隔离级别](#SQL标准中对事务的4个隔离级别)
+            - [read uncommitted](#读未提交)
+            - [read committed](#读已提交)
+            - [repeatable](#可重复读)
+            - [serializable](#串行化)
+        - [透彻剖析Mysql的MVCC事务隔离机制](#透彻剖析Mysql的MVCC事务隔离机制)
+            - [undo log版本链](#undo log版本链)
+            - [ReadView机制](#ReadView机制)
+            - [Read Committed隔离级别是如何基于ReadView机制实现的？](#Read Committed隔离级别是如何基于ReadView机制实现的？)
+            - [MySQL最牛的RR隔离级别，是如何基于ReadView机制实现的？](#MySQL最牛的RR隔离级别，是如何基于ReadView机制实现的？)
+        - [多个事务更新同一行数据时，是如何加锁避免脏写的？](#多个事务更新同一行数据时，是如何加锁避免脏写的？)
+            - [共享锁](#共享锁)
+            - [独占锁](#独占锁)
     - [mysql数据模型](#mysql数据模型)
-      - [VARCHAR这种变长字段，在磁盘上到底是如何存储的](#VARCHAR这种变长字段，在磁盘上到底是如何存储的)
-      - [一行数据中的多个NULL字段值在磁盘上怎么存储？](#一行数据中的多个NULL字段值在磁盘上怎么存储？)
-      - [磁盘文件中40个bit位的数据头以及真实数据是如何存储的？](#磁盘文件中40个bit位的数据头以及真实数据是如何存储的？)
-      - [行溢出](#行溢出)        
-      - [表空间](#表空间)
-    
+        - [VARCHAR这种变长字段，在磁盘上到底是如何存储的](#VARCHAR这种变长字段，在磁盘上到底是如何存储的)
+        - [一行数据中的多个NULL字段值在磁盘上怎么存储？](#一行数据中的多个NULL字段值在磁盘上怎么存储？)
+        - [磁盘文件中40个bit位的数据头以及真实数据是如何存储的？](#磁盘文件中40个bit位的数据头以及真实数据是如何存储的？)
+        - [行溢出](#行溢出)
+        - [表空间](#表空间)
+
 - [生产实践](#生产实践)
     - [真实生产环境下的数据库机器配置如何规划？](#真实生产环境下的数据库机器配置如何规划？)
     - [互联网公司的生产环境数据库是如何进行性能测试的？](#互联网公司的生产环境数据库是如何进行性能测试的？？)
@@ -50,8 +53,7 @@
 
 ### mysql架构设计
 
-一个不变的原则：网络连接必须让线程处理
-mysql架构的整体设计原理
+一个不变的原则：网络连接必须让线程处理 mysql架构的整体设计原理
 ![img_1.png](image/mysqlshejiyuanli.png)
 
 ### InnoDB存储引擎的架构设计
@@ -62,8 +64,7 @@ mysql架构的整体设计原理
 
 拆分成两个阶段：
 
-  上图的1，2，3，4是执行更新语句的时候干的事，
-  5，6是从你提交事务开始的，属于提交事务阶段
+上图的1，2，3，4是执行更新语句的时候干的事， 5，6是从你提交事务开始的，属于提交事务阶段
 
     redo log 是一种偏向物理性值的重做日志，本身属于InnoDB存储引擎特有的一个东西。
     
@@ -83,18 +84,19 @@ mysql架构的整体设计原理
 对于数据库这种严格的系统而言，一般建议redo 日志刷盘策略设置为1，保证事务提交之后，数据绝对不能丢失
 
 提交事务时，bin log日志的刷盘策略：
-    
+
       这个策略通过sync_binlog参数来控制binlog的刷盘策略，它的默认值是0
       0:提交事务的时候，新进入 os cache 内存缓存，后刷回到磁盘（bin log会丢失）
       1:提交事务的时候，强制把binlog直接写入磁盘文件里去（bin log不会丢失）
 
 #### buffer pool
+
 ![img_1.png](image/bufferpool.png)
 
 数据库buffer pool 里面会包含很很多个缓存页，同时每个缓存页还有一个数据描述，也可以叫做数据控制
 
-初始化buffer pool 
- 
+初始化buffer pool
+
     数据库只要已启动，就会按照你设置的buffer pool 的大小稍微再加大一点去找操作系统申请一块内存区域，作为buffer pool的内存区域
     
     然后当内存区域申请完毕之后，数据库就会按照默认的缓存页的16kb的大小以及对应800个字节左右的描述数据的大小，在buffer pool 中划分出来一个个缓存页和一个个对应的数据描述
@@ -102,8 +104,6 @@ mysql架构的整体设计原理
     只不过这个时候，buffer pool中一个个缓存页的都是空的，里面什么都没有，要等数据库运行起来，我们对数据进行增删改查的操作的时候，才会把数据对应的磁盘文件读取出来，放入buffer pool 的缓存页
 
 哪些缓存页是空闲的？ free链表
-
-
 
 从磁盘上的数据页放入到buffer pool的缓存页，必然涉及到一个问题，那就是哪些缓存页是空闲的？
 
@@ -158,12 +158,10 @@ LRU算法带来的问题
     2.如果Buffer Pool里缓存了12个联系的数据页，而且这些数据都是比较频繁被访问的，此时就会出发预读机制，把这个区里的其他数据页都加载到缓存里区。
     这个机制是通过参数innodb_random_read_ahead来控制的，默认时OFF，也就是这个规则是关闭的
 
- 另外一种可能导致频繁访问的缓存页被淘汰的场景体验一下
-
-
+另外一种可能导致频繁访问的缓存页被淘汰的场景体验一下
 
 那就是**全表扫描**
-    
+
       类似  SELECT * FROM USERS 他一下子吧这个表里的所有数据页，都加载到Buffer Pool里去
 
 Mysql基于冷热数据分离方案优化LRU算法
@@ -179,6 +177,7 @@ Mysql基于冷热数据分离方案优化LRU算法
     innodb_old_blocks_time 默认设置为1000，也就是1000毫秒
 
     也就是数据加载到冷数据区域，过了1s后，你再访问这个缓存页，他就会被放到热数据区域的链表头部
+
 ![img.png](image/LRU.png)
 
 LRU链表的热数据区域是如何进行优化的？
@@ -215,7 +214,7 @@ redo log长什么样？
     但是如果你修改了一大串的值，类型就是MLOG_WRITE_STRING,就是代表你一下子在那个数据页的某个偏移量位置插入或者修改了一大串的值
     
     日志类型(就是类似MLOG_1BYTE)，表空间号，数据页号，数据页中的偏移量。具体修改的数据
-    
+
 redo log写磁盘的过程
 
     其实mysql内有另外一个数据结构，叫做 redo log block
@@ -226,12 +225,13 @@ redo log写磁盘的过程
         2.2个字节的data length，就是block里写入了多个字节数据；
         3.2个字节的first record group ，这个是说每个事务都会有多个redo log ，一个是redo log group，另一组redo log。那么在这个block里的第一组redo log的偏移量，就是这两个字节存储的；
         4.4个字节的checkpoint on
+
 ![img.png](image/redolog.png)
 
 redo log block 与磁盘文件的关系
 
 ![img.png](image/redo_log_block2.png)
-    
+
 平时我们执行完增删改之后，要写入磁盘的redo log，其实应该是先进入到redo log block这个数据结构里，然后再进入磁盘文件
 
 redo log buffer 类似申请出一块连续的空间，然后里面划分出N多个空的redo log block
@@ -241,7 +241,7 @@ redo log buffer 类似申请出一块连续的空间，然后里面划分出N多
 ![img_1.png](image/redo_log_block3.png)
 
 redo log buffer中的缓冲日志，到底是什么时候写入磁盘的？
-    
+
     （1）如果写入redo log buffer的日志已经占据了redo log buffer总容量的一半了，也就是超过了8MB的redo log在
     缓冲里了，此时就会把他们刷入到磁盘文件里去
     （2）一个事务提交的时候，必须把他的那些redo log所在的redo log block都刷入到磁盘文件里去，只有这样，当事
@@ -252,14 +252,14 @@ redo log buffer中的缓冲日志，到底是什么时候写入磁盘的？
     （3）后台线程定时刷新，有一个后台线程每隔1秒就会把redo log buffer里的redo log block刷到磁盘文件里去
     （4）MySQL关闭的时候，redo log block都会刷入到磁盘里去
 
-
 redo log占用磁盘越来越大怎么办？
 
 实际上默认情况下，redo log都会写入到一个目录中文件按里，这个目录可以通过
-    
+
     show variables like 'datadir'
+
 可以通过修改
-        
+
     innodb_log_group_home_dir
 
 参数来设置redo log这个目录
@@ -271,7 +271,6 @@ redo log占用磁盘越来越大怎么办？
 指定日志文件的数量
 
     innodb_log_file_in_group
-
 
 ![img.png](image/redologsetting.png)
 
@@ -285,27 +284,24 @@ INSERT 语句的undo log 类型是TRX_UNDO_INSERT_REC ，这个undo log里包含
         4.undo log 日志编号
         5.undo log 日志类型
         6.这条日志的结束位置
-        
+
 ![img.png](image/undolog.png)
 
-
 现在事务要是回滚，直接从undo log 日志中拿出这个id，找到对应的数据删掉
-
-
 
 ### 事务
 
 #### 多事务并发更新或者查询的数据问题
 
 多个事务要是对缓存页里的同一条数据同时进行更新或者查询，此时会产生哪些问题？
-    
+
       实际上会设计到脏读，脏写，不可重复读，幻读
 
 ##### 脏写
 
     事务B修改了事务A修改过的值，此时事务A还没提交，所以事务A随时会回滚，导致事务B修改过的值也没了
 
-   ![img.png](image/zangxie.png)
+![img.png](image/zangxie.png)
 
 ##### 脏读
 
@@ -313,14 +309,11 @@ INSERT 语句的undo log 类型是TRX_UNDO_INSERT_REC ，这个undo log里包含
 
 ![img.png](image/zangdu.png)
 
-
 其實一句话总结：
 
     无论是脏写还是脏读，都是因为一个事务去更新或者查询了另外一个还没有提交的事务更新过的数据
         
     因为另外一个事务还没提交，所以他随时可能反悔回滚，那么必然导致你更新的数据没了，或者你之前查询到的数据就没了，这种就是脏读和脏写。
-
-
 
 ##### 不可重复读
 
@@ -331,7 +324,6 @@ INSERT 语句的undo log 类型是TRX_UNDO_INSERT_REC ，这个undo log里包含
 
 ##### 幻读
 
-
 #### SQL标准中对事务的4个隔离级别
 
 SQL标准中滚定了4种事务隔离级别，并不是Mysql的事务隔离级别，mysql的事务隔离级别有点差别。
@@ -340,32 +332,29 @@ SQL标准中滚定了4种事务隔离级别，并不是Mysql的事务隔离级�
 
 这四种级别包括：
 
-##### read uncommitted  读未提交：是不允许脏写的
+##### read uncommitted 读未提交：是不允许脏写的
 
     也就是说，不可能两个事务在没有提交的情况下去更新同一行数据的值，
     但是这种隔离级别下，可能发生脏读，不可重复度，幻读。
 
-##### read committed  RC  读已提交：不可能发生脏写和脏读
-    
+##### read committed  RC 读已提交：不可能发生脏写和脏读
+
     也就是说人家事务没有提交修改的值，你是绝对读不到的
     这种隔离级别下不会发生脏读和脏写，但是可以发生不可重复读和幻读
 
-##### repeatable read RR  可重复读：不可能发生脏读脏写，不可重复读
-    
+##### repeatable read RR 可重复读：不可能发生脏读脏写，不可重复读
+
     你的事务多次查询一个数据的值，哪怕别的事务修改这个值还提交了，没有，你不会读到人家事务提交事务修改过的值
     你的事务一旦开始，多次查询一个值，会一直读到同一个值。
 
-##### serializable  串行化
+##### serializable 串行化
 
      这种隔离级别，根本不允许你多个事务并发执行，只能串起来执行
 
 #### spring对事务的支持
 
-在@Transaction(isolation =isolation.DEFAULT),默认是default，表示数据库是什么就是什么
-isolation.READ_UNCOMMITTED
-isolation.READ_COMMITTED
-isolation.REPEATABLE_READ
-isolation.SERIALIZABLE
+在@Transaction(isolation =isolation.DEFAULT),默认是default，表示数据库是什么就是什么 isolation.READ_UNCOMMITTED isolation.READ_COMMITTED
+isolation.REPEATABLE_READ isolation.SERIALIZABLE
 
 #### 透彻剖析Mysql的MVCC事务隔离机制
 
@@ -404,13 +393,63 @@ isolation.SERIALIZABLE
 
 默认的ReadView 就是这个机制
 
+    默认情况下，有人在更新数据的时候，你去读取这一行数据,直接默认就是开启mvcc机制的。
+    也就是说，此时一行数据的读和写两个操作默认是不会加锁互斥的，因为mysql的mvcc机制就是为了解决这个问题，避免频繁加锁互斥。
+    此时你读取数据，完全可以根据你的ReadView，去在undo log版本链条里找一个你能读取的版本，完全不用顾虑别人在不在更新。
+    就算你真的等他更新完毕了还提交了，基于mvcc机制，你也读取不到他更新的值啊！因为ReadView机制是不允许的，所以你默认情况下的读
+    ，完全不需要加锁，不需要care其他食物的更新加锁问题，直接介于mvcc机制读某个快照就可以了
+    
+    如果要再执行查询的时候想要加锁，mysql支持一种共享锁 就是 s锁，这种共享锁的语法
+    select * from table lock in mode
+    共享锁和独占锁互斥，独占锁之间互斥，共享锁与共享锁不互斥
+        
+    查询的时候还能加互斥锁，也就是 X 锁（Exclude独占锁），这种独占锁的语法
+    select * from table for update
+   
+    当有一个事务加了独占锁之后，其他事务再更新这行数据，都是要加独占锁的，但是只能生成独占锁在后面等待。
+
+    一旦你查询的时候加了独占锁，此时在你的事务提交之前，任何人都不能更新数据，只能你在本事务里更新数据，等你提交了别人在更新数据
 
 #### 多个事务更新同一行数据时，是如何加锁避免脏写的？
+
+多个事务同时更新一行数据，此时都会加锁（X 锁，也就是Exclude独占锁），然后都会等待排队，必须一个事务执行完毕了，提交了，释放了锁，才能唤醒别的事务继续执行。
+
 加锁
 
 ![img.png](image/jiasuo.png)
 
 释放锁-加锁![img.png](image/shifangsuojiasuo.png)
+
+##### 共享锁
+
+    如果要再执行查询的时候想要加锁，mysql支持一种共享锁 就是 s锁，这种共享锁的语法
+    select * from table lock in mode
+    共享锁和独占锁互斥，独占锁之间互斥，共享锁与共享锁不互斥
+
+
+    默认情况下，有人在更新数据的时候，你去读取这一行数据,直接默认就是开启mvcc机制的。
+    也就是说，此时一行数据的读和写两个操作默认是不会加锁互斥的，因为mysql的mvcc机制就是为了解决这个问题，避免频繁加锁互斥。
+    
+    如果要再执行查询的时候想要加锁，mysql支持一种共享锁 就是 s锁，这种共享锁的语法
+    select * from table lock in mode
+    共享锁和独占锁互斥，独占锁之间互斥，共享锁与共享锁不互斥
+        
+    查询的时候还能加互斥锁，也就是 X 锁（Exclude独占锁），这种独占锁的语法
+    select * from table for update
+   
+    当有一个事务加了独占锁之后，其他事务再更新这行数据，都是要加独占锁的，但是只能生成独占锁在后面等待。
+
+    一旦你查询的时候加了独占锁，此时在你的事务提交之前，任何人都不能更新数据，只能你在本事务里更新数据，等你提交了别人在更新数据
+
+##### 独占锁
+
+    当有一个事务加了独占锁之后，其他事务再更新这行数据，都是要加独占锁的，但是只能生成独占锁在后面等待。
+
+    查询的时候还能加互斥锁，也就是 X 锁（Exclude独占锁），这种独占锁的语法
+    
+    select * from table for update
+
+    一旦你查询的时候加了独占锁，此时在你的事务提交之前，任何人都不能更新数据，只能你在本事务里更新数据，等你提交了别人在更新数据
 
 ### mysql物理存储
 
@@ -460,7 +499,7 @@ isolation.SERIALIZABLE
     然后会有NULL值列表，对于允许NULL值得字段都会有一个bit位标识那个字段是否为NULL，也是逆序排序得
 
 每一行数据存储得时候，还得有一个bit位得数据头，这个数据头是用来描述这行数据的。
-  
+
     第一位bit和第二位bit都是预留位，是没有任何含义的。
     接下来的bit位是delete_mask：他标识这行数据是否被删除了
     下一个bit位是min_rec_mask：在B+树里每一层的非页字节点里最小值都有这个标记
@@ -472,9 +511,10 @@ isolation.SERIALIZABLE
        2：代表是最小值的数据 
        3：代表最大值的数据
     最后16位bit是next_record:这个是他下一条数据的指针
+
 #### 一行数据实际在磁盘上的存储
 
-![img.png](image/mysqlcipancunchu.png)变长字段列表 NULL值列表  数据头  真实数据
+![img.png](image/mysqlcipancunchu.png)变长字段列表 NULL值列表 数据头 真实数据
 
 在实际存储一行数据的时候，会在他真实数据部分，添加一些隐藏字段
 
@@ -489,7 +529,6 @@ isolation.SERIALIZABLE
 
 行溢出：就是一行的数据存储太多的内容，一个数据页都放不下，此时只能溢出这个数据页，把数据溢出存放到其他数据页里去，那些数据页就叫做溢出页。
 
-
 #### 表空间
 
     表空间：我们平时创建的那些表，其实就是都有一个表空间的概念，在磁盘上对会对应'表明.ibd'，这样的一个磁盘数据文件。’
@@ -500,9 +539,6 @@ isolation.SERIALIZABLE
     当我们需要执行CRUD操作的时候，说白，就是从磁盘上表空间的数据文件里，去加载一些数据页出来到buffer pool的缓存页里区使用
 
 ![img.png](image/shujuqu.png)
-
-
-
 
 ### 生产实践
 
@@ -516,7 +552,6 @@ isolation.SERIALIZABLE
 高并发场景数据库应该选择什么样的机器？
 
     磁盘，io，网络压力会比较大，最好采用ssd固态硬盘
-
 
 #### 互联网公司的生产环境数据库是如何进行性能测试的？
 
@@ -551,7 +586,7 @@ IO相关压测性指标
 
     内存负载：：这个就是看看在压测到⼀定情况下的时候，你的机器内存耗费了多少，如果说机器内存耗费过⾼了，说明也
     不能继续压测下去了
-      
+
 #### 如何对生产环境中的数据库进行360度无死角压测？（https://apppukyptrl1086.pc.xiaoe-tech.com/detail/i_5e383c5357307_MjhluwMb/1?from=p_5e0c2a35dbbc9_MNDGDYba&type=6）
 
 在linux 安装sysbench
@@ -571,7 +606,7 @@ IO相关压测性指标
     然后他自己由一个时序数据库，他会把采集道德监控数据放到自己的时序数据库中，本质就是存储在磁盘文件里。
     
     Grafana：就是一个可视化的监控数据展示系统，他可以Prometheus采集到的大量mysql监控数据展示成各种精美报告，可以让我们直接看到mysql的监控情况。
-    
+
 #### 如何通过多个Buffer Pool来优化数据库的并发性能
 
 多线程并发访问一个Buffer Pool的时候必然会加锁，然后很多线程可能要串行着排队，一个个的依次执行操作。
@@ -589,27 +624,23 @@ IO相关压测性指标
 
 #### 如何通过chunk来支持数据库运行期间的Buffer Pool动态调整
 
-
 实际上Buffer Pool是由很多个chuck组成的，他的大小是innodb_buffer_pool_chunk_size 来控制的默认值是128M
-
 
     所以实际上我们可以做一个假设，比如现在我们给Buffer Pool 设置一个总大小是8GB，然后4个Buffer Pool ，那么每个Buffer Pool 就是2GB
      此时每个Buffer Pool 是由一系列的128M chuck组成的，也就是说每个Buffer Pool 会有16个chuck，然后每个Buffer Pool里的每个chuck里就是一系列
     数据描述和缓存页，每个Buffer Pool里的多个chuck共享一套 free flush lru 链表 
 
-
 #### 在生产环境中，如何基于机器配置来合理设置Buffer Pool
 
 Buffer Pool 的大小一般设置为机器大小的50-60%
 
-确定了Buffer pool 的总大小之后，就得考虑设置多少个buffer pool以及chuck 
+确定了Buffer pool 的总大小之后，就得考虑设置多少个buffer pool以及chuck
 
-一般来说： buffer pool总大小 =  （chuck大小 * buffer pool数量）的倍数
+一般来说： buffer pool总大小 = （chuck大小 * buffer pool数量）的倍数
 
 #### Linux操作系统的存储系统软件层原理剖析以及IO调度优化原理
 
-Linux的存储系统分为VFS层、⽂件系统层、Page Cache缓存层、通⽤Block层、IO调度层、Block设备驱动
-层、Block设备层，
+Linux的存储系统分为VFS层、⽂件系统层、Page Cache缓存层、通⽤Block层、IO调度层、Block设备驱动 层、Block设备层，
 
 ![img.png](image/linuxcunchujiegou.png)
 
@@ -652,9 +683,9 @@ VFS层：根据你是对哪个目录中的文件执执行磁盘IO操作，把IO�
     所以MySQL数据库软件都是安装在一台linux服务器上的，然后启动MySQL的进程，就是启动了一个MySQL数据库
     
     MySQL运行过程中，他需要使用CPU、内存、磁盘和网卡这些硬件，但是不能直接使用，都是通过调用操作系统提供的接口，依托于操作系统来使用和运行的，然后linux操作系统负责操作底层的硬件。
-    
+
 ![img.png](image/mysql_1.png)
-    
+
     数据库部署在机器上的时候，存储都是搭建的RAID存储架构
     
     RAID就是一个磁盘冗余阵列
@@ -676,15 +707,13 @@ VFS层：根据你是对哪个目录中的文件执执行磁盘IO操作，把IO�
     ![img.png](image/mysql_3.png)
 
 所以其实有的RAID磁盘冗余阵列技术里，是可以把你写入的同样一份数据，在两块磁盘上都写入的.
-这样可以让两块磁盘上的数据一样，作为冗余备份，然后当你一块磁盘坏掉的时候，可以从另外一块磁盘读取冗余数据出来，这一切都是RAID技术自动帮你管理的，不需要你操心，
-如下图。
+这样可以让两块磁盘上的数据一样，作为冗余备份，然后当你一块磁盘坏掉的时候，可以从另外一块磁盘读取冗余数据出来，这一切都是RAID技术自动帮你管理的，不需要你操心， 如下图。
 
 ![img.png](image/mysql_4.png)
 
 所以RAID技术实际上就是管理多块磁盘的一种磁盘阵列技术，他有软件层面的东西，也有硬件层买的东西，比如有RAID卡这种硬件设备。
 
 具体来说，RAID还可以分成不同的技术方案，比如RAID 0、RAID 1、RAID 0+1、RAID2，等等，一直到RAID 10，很多种不同的多磁盘管理技术方案
-
 
 #### 数据库服务器上的RAID存储架构的电池充放电原理
 
@@ -697,13 +726,12 @@ RAID緩存模式設置為write back，意思是先寫緩存再寫磁盤整列
 
 #### RAID锂电池充放电导致的MySQL数据库性能抖动的优化
 
-RAID 0：同时些很多快磁盘，读写并发能力强，容易丢失数据
-RAID 1：两块磁盘为镜像关系，所写的数据在另一块磁盘上都有，形成数据冗余，防止数据丢失，分摊读写的压力。
+RAID 0：同时些很多快磁盘，读写并发能力强，容易丢失数据 RAID 1：两块磁盘为镜像关系，所写的数据在另一块磁盘上都有，形成数据冗余，防止数据丢失，分摊读写的压力。
 
 RAID 10 = RAID 0 + RAID 1：写的时候使用RAID 0 的思路，备份使用RAID 1 的思路。
 
 对于RAID 锂电池充放电问题导致的存储性能抖动，一般有三种解决方案：
-    
+
     1.给RAID卡把锂电池换成电容，电容是不用频繁充放电的，不会导致充放电的性能抖动，还有就是电容可以支持透明充放电，就是自动检查电量，自动进行充电，不会说在充放电的时候让写IO直接走磁盘，但是更换电容很麻烦，而且电容比较容易老化，这个其实一般不常用
 
     2.手动充放电，这个比较常用，包括一些大家知道的顶尖互联网大厂的数据库服务器的RAID就是用了这个方案避免性能抖动，就是关闭RAID自动充放电，然后写一个脚本，脚本每隔一段时间自动在晚上凌晨的业务低峰时期，脚本手动触发充放电，这样可以避免业务高峰期的时候RAID自动充放电引起性能抖动
@@ -717,7 +745,7 @@ TooManyConnections 说明数据库连接池已经满了，你的业务系统不�
 检查mysql的配置文件 my.conf，里面有个关键的参数max_connections就是mysql建立的最大连接数。
 
 查看mysql实际最大连接数
-    
+
     show variables like 'max_connections'
 
 mysql无法设置max_connections期望值，只能强行限制为214？为什么？
@@ -725,7 +753,7 @@ mysql无法设置max_connections期望值，只能强行限制为214？为什么
         简单来说，就是因为底层linux操作系统把进程可以打开的文件句柄数限制为1024了导致mysql最大连接数时214
         为什么linux的最大文件句柄限制为1024的时候，MySQL的最大连接数是214呢？ 
         原因其实是mysql内部源码写死的，它在源码中就是有一个公式，算下来如此罢了
-        
+
 如何解决经典的Too Many Connections故障，背后的原理是什么？
 
         ulimit -HSn 65535
