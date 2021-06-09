@@ -740,6 +740,18 @@ rows:是预估通过索引或者别的方式访问这个表的时候，大概可
 filtered:就是通过搜索条件过滤后得剩下数据得百分比
 extra：一些额外得信息
 
+
+select_type:    
+        
+    一般单表或者多表连接查询，他们得select_type都是SIMPLE，就是简单得查询
+    如果是union 语句，第一条执行计划针对表1，select_type 就是 PRIMARY
+                    第二条执行计划针对表2，select_type 就是 UNION
+                    第三条执行计划就是针对两个查询结果依托 一个临时表去重
+                    第三条执行计划 select_type 就是 union_result
+    如果是子查询，第一条执行计划 select_type 就是 PRIMARY
+                第二条执行计划 select_type 就是SUBQUERY  
+                select_type 是DERIVED 针对子查询得结果集会物化一个内部临时表
+
 #### sql调优
 
     在sql调优的时候，核心就是分析执行计划里哪些出现了全表扫描，或者扫描的数据过大，尽可能的通过合理
