@@ -59,7 +59,10 @@
     - [数据库服务器上的RAID存储架构的电池充放电原理](#数据库服务器上的RAID存储架构的电池充放电原理)
     - [数据库无法连接故障的定位，Too many connections](#数据库无法连接故障的定位Toomanyconnections)
     - [线上数据库不确定性的性能抖动优化](#线上数据库不确定性的性能抖动优化)
-
+    
+- [mysql主从架构](#mysql主从架构)
+    - [主从架构的原理](#主从架构的原理)
+    - [主从复制架构的搭建](#主从复制架构的搭建)
 # 目录
 
 ## mysql基础架构
@@ -758,6 +761,14 @@ select_type:
     优化索引保证执行计划每个步骤都是基于索引执行，避免扫描过多的数据
 
 
+如果mysql使用了错误得执行计划应该怎么办？
+   使用 force index 语法就可以了
+
+ select * from table fore index (index) where  index = ""
+
+为什么mysql 默认会选对主键得聚簇索引进行扫描？
+
+
 ### mysql物理存储
 
 #### VARCHAR这种变长字段，在磁盘上到底是如何存储的
@@ -1090,3 +1101,52 @@ redo log日志对应的更新操作改动了缓存页，那写缓存页还没有
     3.innodb_flush_neighbors,意思是在flush缓存页到磁盘德时候，可能会把缓存页临近的其他缓存页也刷到磁盘
     但是这样有时候会导致flush缓存也太多了，实际上如果你使用的是SSD固态硬盘，并没必要让他同时刷进临近的缓存页，
     可以把innodb_flush_neighbors设置为0，禁止刷进缓存页
+
+
+## mysql主从架构
+
+### 主从架构的原理
+
+ 大致来说：就是主库接受增删改的操作，把增删改操作binlog写入本地文件，然后从库发送请求来拉取binlog,接着从库上重复执行一遍binlog的操作，就可以还原出一样的数据。
+ 
+### 主从复制架构的搭建
+
+事前准备：
+
+    1.首先确保主库和从库的server_id是不同的，这个是必然的
+    2.主库必须打开binlog功能，你必须打开binlog功能，主库才会写binlog到本地磁盘，接着按照如下步骤
+
+1.在主库上创建一个主从复制的账号
+
+    create user 'backup_user'@'192.168.31.%' identified by 'backup_123';
+    grant replication slave on *.* to 'backup_user'@'192.168.31.%';
+    flush privileges;
+
+ 2.如果主库跑了一段时间，现在要挂一个从库，应该在凌晨时，对主库和从库做一个数据备份和导入
+ 
+    可以使用mysqldump工具把主库在这个时刻的数据全量备份，但是此时一定是不允许操作主库的，主库的数据时不能有变动的
+    /usr/local/mysql/bin/mysqldump --single-transaction -uroot -proot --master-data=2 -A > backup.sql
+
+    注意，mysqldump工具就是在你的Mysql安装目录的bin目录下，然后用上述命令对你的主库所有的数据都做一个备份，
+    备份会以sql语句的方式进入指定的backup.sql 文件，只要执行backup.sql 就可以恢复出来跟主库一样的数据了
+
+    --master-data=2，是说备份的sql文件里，要记录一下此时主库的binlog文件和position号这是为了主从复制做准备的
+
+    接着从库执行下面的命令取执行主库进行复制
+
+    CHANGE MASTER TO MASTER_HOST='192.168.31.229',
+    MASTER_USER='backup_user',MASTER_PASSWORD='backup_123',MASTER_LOG_FILE='mysqlbin.000015',MASTER_LOG_POS=1689;
+
+    可能有人会疑惑，上面的master机器的ip地址我们是知道的，master上用于执行复制的用户名和密码是我们自己创建
+    的，也没问题，但是master的binlog文件和position是怎么知道的？这不就是之前我们mysqldump导出的
+    backup.sql里就有，大家在执行上述命令前，打开那个backup.sql就可以看到如下内容：
+    MASTER_LOG_FILE='mysql-bin.000015',MASTER_LOG_POS=1689
+    然后你就把上述内容写入到主从复制的命令里去了。
+    接着执行一个开始进行主从复制的命令：start slave，再用show slave status查看一下主从复制的状态，主要看到
+    Slave_IO_Running和Slave_SQL_Running都是Yes就说明一切正常了，主从开始复制了。
+    接着就可以在主库插入一条数据，然后在从库查询这条数据，只要能够在从库查到这条数据，就说明主从复制已经成
+    功了。
+    这仅仅是最简单的一种主从复制，就是异步复制，就是之前讲过的那种原理，从库是异步拉取binlog来同步的，所以
+    肯定会出现短暂的主从不一致的问题的，比如你在主库刚插入数据，结果在从库立马查询，可能是查不到的。
+    
+        
