@@ -473,7 +473,14 @@ document
 
 1.Elasticsearch内部如何基于_version如何进行乐观锁并发控制
 
-第一次创建一个document的时候，它的_version内部版本号就是1;以后，每次对这个document执行修改或者删除操作，都会对这个_version版本号自动加1;哪怕是删除，也会对这条数据的版本号加1
+1.第一次创建一个document的时候，它的_version内部版本号就是1;
+2.以后，每次对这个document执行修改或者删除操作，都会对这个_version版本号自动加1;哪怕是删除，也会对这条数据的版本号加1
+3.多线程并发更新数据时,先获取document数据和最新版本号， 只有当你提供的version与es中的，version-模一样的时候，才可以进行修改，只要不一样，就报错或执行retry策略（需要配置参数）;
+3.别的线程更新失败后，执行retry策略
+retry策略
+1、再次获取document数据和最新版本号
+2、基于最新版本号再次去更新，如果成功那么就ok了
+3、如果失败,重复1和2两个步骤,最多,重复几次呢?可以通过retry那个参数的值指定,比如5次
 
 
 #### 基于externa1lVersion进行乐观锁并发控制
@@ -484,7 +491,9 @@ document
     这个时候，你进行乐观锁并发控制的时候，可能并不是想要用es内部的_version来进行控制，而是用你自己维护的那个version来进行控制。
     ?version=1
     ?version=1&version_type=externa1
+
     version_type=externa1,唯一-的区别在于， version, 只有当你提供的version与es中的，version-模一样的时候，才可以进行修改，只要不一样，就报错;
+
     当version_type=externa1的时候， 只有当你提供的versi on比es中的_versi on大的时候，才能完成修改
     es，_version=1?version=1， 才能更新成功
     es，_version=1?version> 1&version_type=externa1, 才能成功，比如说?versi on=2&version_type=externa1
