@@ -21,7 +21,12 @@
           - [shard&replica机制梳理](#Shard&replica机制梳理)
       - [Elasticsearch横向扩容原理](#Elasticsearch横向扩容原理)
           - [Elasticsearch分布式原理_横向扩容，如何超出扩容极限以及如何提升容错性](#Elasticsearch分布式原理_横向扩容，如何超出扩容极限以及如何提升容错性)
-          - [Elasticsearch容错机制：master选举，replace容错，数据恢复](#Elasticsearch容错机制：master选举，replace容错，数据恢复)
+      - [Elasticsearch容错机制：master选举，replace容错，数据恢复](#Elasticsearch容错机制：master选举，replace容错，数据恢复)
+    - [Elasticsearch分布式document](#Elasticsearch分布式document)
+      - [_index元数据](#Index元数据)
+      - [_type元数据](#Type元数据)
+      - [_id元数据](#Id元数据)
+      - [_source元数据](#Source元数据)
 - [Elasticsearch高手进阶篇](#Elasticsearch高手进阶篇)
     - [redis](#redis)
   
@@ -403,8 +408,46 @@ _source:指定要查询出来的field
     (4)超出扩容极限，动态修改rep1ica数量，9个shard (3primary， 6 rep1ica)，扩容到9台机器，比3台机器时，拥有3倍的读吞吐量
     (5) 3台机器下，9个shard (3 primary, 6 replica) ，资源更少，但是容错性更好，最多容纳2台机器宕机，6个shard只能容纳1台机器宕
 
-##### Elasticsearch容错机制：master选举，replace容错，数据恢复
+#### Elasticsearch容错机制：master选举，replace容错，数据恢复
 
     (1).容错第-步: master选举，自动选举另外一个node成为新的master ,承担起master的责任来
     (2).容错第二步:新master ,将丢失掉的primary shard的某个replica shard提升为primary shard.此时cluster status会变为yellow ,因为primaryshard全都变成active了.但是,少了一个replica shard ,所以不是所有的replica shard都是active了.
     (3).容错第三步:重启故障的node ,new master ,会将缺失的副本都是copy-份到该node上去。而且该node会使用之前已有的shard数据，只是同步- -下宕机之后发生过的修改。cluster status变为green,因为primary shard和replica shard都齐全了
+
+### Elasticsearch分布式document
+
+#### Index元数据
+
+    (1)代表一个document存放在哪个index中
+    (2)类似的数据放在一一个素引，非类似的数据放不同索引
+    (3) index中包含了很多类似的document
+    (4)索引名称必须是小写的，不能用下划线开头，不能包含逗号
+
+#### Type元数据
+
+    (1)代表document属于index中的哪个类别(type)
+    (2)一个索引通常会划分为多个type,谭辑上对index中有些许不同的几类数据进行分类
+    (3) type名称可以是大写或者小写，但是同时不能用下划线开头，不能包含逗号
+
+#### Id元数据
+
+    (1)代表document的唯-标识， 与index和type一起， 可以唯-标识和定位一-个document
+    (2)我们可以手动指定document的id,也可以不指定，由es自动为我们创建一-个id
+
+
+
+根据应用情况来说，是否满足手动指定document id的前提:
+
+    -般来说，是从某些其他的系统中，导入一些数据到es时，会采取这种方式，就是使用系统中已有数据的唯一标识，作为es中document的id。 举个例子，比如说，我们现在在开发
+    - 一个电商网站，做搜索功能:或者是0A系统，做员工检索功能。这个时候，数据首先会在网站系统或者IT系统内部的数据库中，会先有一 份，此时就肯定会有- 一个数据库的primary
+      key (自增长，UID,或者是业务编号)。如果将数据导入到es中，此时就比较适合采用数据在数据库中已有的primary key。
+      如果说，我们是在做一个系统，这个系统主要的数据存储就是es- -种，也就是说，数据产生出来以后，可能就没有id, 直接就放es- -个存储，那么这个时候，可能就不太适合说手
+      动指定document id的形式了，因为你也不知道i d应该是什么，此时可以采取下面要讲解的让es自动生成i d的方式。
+      (2) put /index/ type/id
+      (3.2)、自动生成document id
+      (1) post ./index/ type.
+      (2)自动生成的id,长度为20个字符，URL安全，base64编码， GUID, 分布式系统并行生成时不可能会发生冲突
+
+#### Source元数据
+
+    _source元数据:就是说，我们在创建一个document的时候， 使用的那个放在request body中的json串， 默认情况下，在get的时候，会原封不动的给我们返回回来。定制返回的结果，指定_source中，返回哪些field
