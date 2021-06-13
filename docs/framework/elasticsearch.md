@@ -30,7 +30,7 @@
       - [document的全量替换](#Document的全量替换)
       - [_基于externa1lVersion进行乐观锁并发控制](#基于externa1lVersion进行乐观锁并发控制)
       - [partial update](#PartialUpdate)
-        
+      - [批量操作](#批量操作)
 - [Elasticsearch高手进阶篇](#Elasticsearch高手进阶篇)
     - [redis](#redis)
   
@@ -555,3 +555,47 @@ retry策略
 1、再次获取document数据和最新版本号
 2、基于最新版本号再次去更新，如果成功那么就ok了
 3、如果失败,重复1和2两个步骤,最多,重复几次呢?可以通过retry那个参数的值指定,比如5次
+
+
+#### 批量操作
+
+
+
+mget批量查询API(很重要，性能优化的一种方式)
+
+
+    就是一条一条的查询，比如说要查询100条数据，那么就要发送100次网络请求，这个开销还是很大的
+    如果进行批量查询的话，查询100条数据，就只要发送1次网络请求，网络请求的性能开销缩减100倍
+
+语法一：
+
+语法二：查询不同一个index不同type的Document
+
+    GET /index/_mget
+        {
+        "docs":[
+            {
+            "_index"："index"，
+            "_type": "type",
+            "_id":"id"
+            },
+            {
+            "_index"："index"，
+            "_type": "type",
+            "_id":"id"
+            }
+    }
+语法三：查询同一个index不同type的Document
+
+    GET /index/_mget
+    {
+        "docs":[
+            {
+                "_type": "type",
+                "_id":"id"
+            },
+            {
+            "_type": "type",
+            "_id":"id"
+            }
+    }
