@@ -31,6 +31,15 @@
       - [_基于externa1lVersion进行乐观锁并发控制](#基于externa1lVersion进行乐观锁并发控制)
       - [partial update](#PartialUpdate)
       - [批量操作](#批量操作)
+    - [Elasticsearch分布式系统](#Elasticsearch分布式系统)
+      - [document数据路由原理](#Document数据路由原理)
+      - [Document增删改内部原理](#Document增删改内部原理)
+      - [写一致性原理以及quorum机制的深入解析](#写一致性原理以及quorum机制的深入解析)
+      - [Document内部查询原理](#Document内部查询原理)
+      - [BuilApi的奇特json格式与底层性能优化关系](#BuilApi的奇特json格式与底层性能优化关系)
+
+
+#### 
 - [Elasticsearch高手进阶篇](#Elasticsearch高手进阶篇)
     - [redis](#redis)
   
@@ -562,6 +571,7 @@ retry策略
 3、如果失败,重复1和2两个步骤,最多,重复几次呢?可以通过retry那个参数的值指定,比如5次
 
 
+
 #### 批量操作
 
 
@@ -617,7 +627,7 @@ bulk批量增删改
 
 1、bulk语法
 
-    POST /_bulk
+    POST /_bulk 或则POST index/type/_bulk
     delete": {” index":" test_ index,，” type" :“ test_ type'“?”J
     create" :index" :” test_ index，”_ type' :” test_ type"，”_ id" :“ 12”} }test_ fie1d": " test12”}
     index": {_index":" test_ index' '，”_type" : "test_ _type” }}，test_ field" :auto-generate id test
@@ -640,3 +650,57 @@ bulk批量增删改
     (2) create: PUT /index/type/id/ create， 强制创建
     (3) index: 普通的put操作，可以是创建文档，也可以是全量替换文档
     ( 4) update: 执行的partial update操作
+
+
+bulk size最佳大小
+    
+    bulk, reguest会加载到内存里， 如果太大的话，性能反而会下降，因此需要反复尝试一 个最佳的bulk size。 - -般从1000 5000条数据开始，尝试逐渐增加。另外，如果看大小的话
+    最好是在5^ 15MB之间。
+
+
+document 总结 
+
+    到目前为止，你觉得你在学什么东西，给大家个真观的感觉，好像已经知道了es是分布式的， 包括一些基本的原理，然后化了不少时间在学习document本身相关的操作，增删改
+    查。一句话点出来，给大家归纳总结一 下，其实我们应该思考一 下，es的一个最最核心的功能，已经被我们相对完整的讲完了。
+    Blastigsearch件电智
+    来以
+    其实起到的第一个最核心的功能。就是、个分布式的文档数据存储系统。ES是 分布式的。文档数据存储系统。文档据，存储系统。
+    文档数据: es可以存储和操作json文档类型的数据， 而且这也是es的核心数据结构。
+    存储系统: es可以对json文档类型的数据进行存储，查询，创建，更新，删除，等等操作。其实已经起到了一个什么样的效果呢?其实ES满足了这些功能，就可以说已经是一个
+    NoSQL的存储系统了。
+    围绕着document在操作，其实就是把es当成了一个NoSQL存储引擎，一个 可以存储文档类型数据的存储系统，在操作里面的document。
+    s可以作为一个分布式的文档存储系统，所以说，我们的应用系统，是不是就可以基于这个概念，去进行相关的应用程序的开发了。
+    什么类型的应用程序呢?
+    I (①)数据量较大: es的分布式本质，可以帮助你快速进行护
+    有的
+    承载大量数据
+    (2)
+    教据精构家适备著随时可能会奔化计雪且教据替格之间的美系常基森出 如果聚们用传统数摄居奇那号不是很玩，因为要面临太量的表
+    (3)
+    对数据的
+    作较为简单，比
+    就是一些间
+    改查，用我们之前讲解的那些document操作就可以搞定
+    (4) NoSQL数据库，适用的也是类似于，上面的这种场景
+    举个例子，比如说像一些网站系统，或者是普通的电商系统，博客系统，面向对象概念比较复杂，但是作为终端网站来说，没什么太复杂的功能，就是一些简单的CRUD操作， 而且
+    数据量可能还比较大。这个时候选用ES这种NoSQL型的数据存储，比传统的复杂的功能务必强大的支持SOL的关系型数据库，更加合适一些。无论是性能，还是
+    春吐量，可能都会更|
+    好。
+
+
+### Elasticsearch分布式系统
+
+
+#### Document数据路由原理
+
+
+#### Document增删改内部原理
+
+
+#### 写一致性原理以及quorum机制的深入解析
+
+
+#### Document内部查询原理
+
+
+#### BuilApi的奇特json格式与底层性能优化关系
