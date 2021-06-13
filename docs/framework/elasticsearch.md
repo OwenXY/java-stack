@@ -27,6 +27,10 @@
       - [_type元数据](#Type元数据)
       - [_id元数据](#Id元数据)
       - [_source元数据](#Source元数据)
+      - [document的全量替换](#Document的全量替换)
+      - [_基于externa1lVersion进行乐观锁并发控制](#基于externa1lVersion进行乐观锁并发控制)
+      - [partial update](#PartialUpdate)
+        
 - [Elasticsearch高手进阶篇](#Elasticsearch高手进阶篇)
     - [redis](#redis)
   
@@ -451,3 +455,88 @@ _source:指定要查询出来的field
 #### Source元数据
 
     _source元数据:就是说，我们在创建一个document的时候， 使用的那个放在request body中的json串， 默认情况下，在get的时候，会原封不动的给我们返回回来。定制返回的结果，指定_source中，返回哪些field
+
+#### Document的全量替换
+
+(1)语法与创建文档是一样的。如果document id不存在，那么就是创建:如果document. ig已经存在，那么就是舍量替换操作,替换document的json串内容
+(2) document是不可变的，如果要修改document的内容，第-种方式就是全量替换，直接对document重新建立索引，替换里面所有的内容。
+PUT /index/type/id?
+(3) es会将老的document标记为deleted,然后新增我们给定的一个document, 当我们创建越来越多的document的时候，es会 在适当的时机在后台自动删除标记为deleted的
+document
+2、document的强制创建
+(1)创建文档与全量替换的语法是一样的， 有时我们只是想新建文档，不想替换文档，如果强制进行创建呢?
+(2) PUT /index/ type/id?op__type=create, 
+    PUT /index/type/id/_create
+3、document的删除
+(1) DELETE  index/type/id
+(2)不会理解物理删除，只会将其标记为deleted，当数据越来越多的时候，在后台自动删除
+
+1.Elasticsearch内部如何基于_version如何进行乐观锁并发控制
+
+第一次创建一个document的时候，它的_version内部版本号就是1;以后，每次对这个document执行修改或者删除操作，都会对这个_version版本号自动加1;哪怕是删除，也会对这条数据的版本号加1
+
+
+#### 基于externa1lVersion进行乐观锁并发控制
+
+    es提供了一个feature, 就是说，你可以不用它提供的内部_version版本号来进行并发控制，可以基于你自己维护的一一个版本号来进行并发控制。
+    举个列子，加入你的数据在mysq1
+    里也有一份，然后你的应用系统本身就维护了-一个版本号，无论是什么自己生成的，程序控制的。
+    这个时候，你进行乐观锁并发控制的时候，可能并不是想要用es内部的_version来进行控制，而是用你自己维护的那个version来进行控制。
+    ?version=1
+    ?version=1&version_type=externa1
+    version_type=externa1,唯一-的区别在于， version, 只有当你提供的version与es中的，version-模一样的时候，才可以进行修改，只要不一样，就报错;
+    当version_type=externa1的时候， 只有当你提供的versi on比es中的_versi on大的时候，才能完成修改
+    es，_version=1?version=1， 才能更新成功
+    es，_version=1?version> 1&version_type=externa1, 才能成功，比如说?versi on=2&version_type=externa1
+
+#### PartialUpdate
+
+
+全量替换语法：
+    
+    PUT /index/type/id,创建文档&替换文档，就是-样的语法
+
+partial update语法：
+
+    post /index/ type/id/_ update
+    {
+    '要修改的少数几个fie1d即可，不需要全量的数据”
+    }
+
+般对应到应用程序中，每次的执行流程基本是这样的（和全量替换的原理一样）:
+
+    (1)应用程序发起一个get请求，获取到document， 展示到前台界面，供用户查看和修改
+    (2)用户在前台界面修改数据，发送到后台
+    (3)后台代码，会将用户修改的数据在内存中进行执行，然后封装好修改后的全量数据
+    (4)然后发送PUT请求，到es中， 进行全量替换
+    (5) es将老的document标记为de1eted，然后重新创建一个 新的document
+
+
+看起来，好像就比较方便了，每次就传递少数几个发生修改的fie1d即可，不需要将全量的document数据发送过去
+
+
+2、图解partial update实现原理以及其优点
+
+    partial update, 看起来很方便的操作，实际内部的原理是什么样子的，然后它的优点是什么|
+    
+    其实es内部对partial update的实际执行,跟传统的全量替换方式，是几乎-样的
+
+    1、内部先获取document
+    2、将传过来的field更新到document的json中
+    3、将老的document标记为deleted
+    4、将修改后的新的document创建出来
+
+partial update相较于全量替换的优点
+
+    1、所有的查询、修改和写回操作,都发生在es中的一 个shard内部,避免了所有的网络数据传输的开销(减少2次网络请求) , 大大提升了性能
+    2、减少了查询和修改中的时间间隔,可以有效减少并发冲突的情况
+
+
+
+基于groovy脚本，如何执行partial update
+
+    es， 其实是有个内置的脚本支持的， 可以基于groovy脚本实现各种各样的复杂操作
+    基于groovy脚本，如何执行partia1 update.
+    es scripting module, 我们会在高手进阶篇去讲解，这里就只是初步讲解一-下
+
+
