@@ -8,7 +8,8 @@
       - [Elasticsearch核心概念](#Elasticsearch核心概念) 
       - [Elasticsearch安装部署](#Elasticsearch安装部署)
       - [Elasticsearch文档的CRUD](#Elasticsearch文档的CRUD)
-      - [Elasticsearch多种搜索方式](#Elasticsearch多种搜索方式)
+      - [Elasticsearch多种搜索方式](#Elasticsearch多种搜索方式) 
+      - [Elasticsearch聚合搜索](#Elasticsearch聚合搜索)
 - [Elasticsearch高手进阶篇](#Elasticsearch高手进阶篇)
     - [redis](#redis)
   
@@ -263,3 +264,62 @@ kibana安装
 在生产环境很少用
 
 （2）、query DSL（Domain Specified Language 特定领域的语言） 基于Http request body请求体，可以用json格式构建语法，可以构建各种复杂的语法
+       
+        例如：  
+        {
+            "query":{ //查询
+            “match_all”:{ //
+            },
+            "filter" :{ // 过滤
+                "range"{
+                    "price" :{"gt",""}
+                }
+            }
+        }
+            "sort":[ 排序
+            {
+            "price":"desc"
+            }
+            ]
+            "from":1, 查询游标
+            "size":2 查询数量
+            }
+            "_source":["",""] :指定要查询出来的field
+         }
+
+
+match:全文检索，将搜素词拆分为一个个词之后去倒排索引中进行匹配
+match_phrase(短语搜索) :要求输入的搜索串，必须在指定字段文本中，完全一模一样的，才能算匹配
+sort:排序
+highlight:高亮
+from:查询游标
+size：查询数量
+_source:指定要查询出来的field
+
+
+#### Elasticsearch聚合搜索
+
+    GET /index/type/_search
+    {
+        "aggs":{
+            "group_by_tags":{
+                "terms"{
+                    "filed":"vaue"
+                }
+            }
+    
+        }
+    }
+
+为需要聚合的filed添加正排索引
+
+    PUT /index/_mapping/type
+    {
+        "properties":{
+            "filed":{ //根据filed的设置
+                "type":"string",
+                "filed":"true",
+            }
+        }
+        
+    }
