@@ -304,7 +304,7 @@ _source:指定要查询出来的field
         "aggs":{
             "group_by_tags":{
                 "terms"{
-                    "filed":"vaue"
+                    "filed":"vaue" //根据filed的分组
                 }
             }
     
