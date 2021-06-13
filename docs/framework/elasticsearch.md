@@ -626,12 +626,13 @@ bulk批量增删改
     {“doc" : {"test_ fie1d2” : "bulk test1"} }
 
 每一-个操作要两个json串， 语法如下:
-'action": { 'metadata"}}
-"data"}
-举例，比如你现在要创建一 个文档，放bulk里面，看起来会是这样子的:
+
+    'action": { 'metadata"}}"data"}
+    举例，比如你现在要创建一 个文档，放bulk里面，看起来会是这样子的:
 
     {" index": {"_ _index": "test_ index"，”type"，"test_ type"， " id":“1"}}
     {" test_ fie1d1":“ test1"，"test_ fie1d2": "test2"}
+一个操作的语法不能换行，不同操作的语法要换行
 
 有哪些类型的操作可以执行呢?
 
