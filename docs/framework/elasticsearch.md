@@ -10,6 +10,18 @@
       - [Elasticsearch文档的CRUD](#Elasticsearch文档的CRUD)
       - [Elasticsearch多种搜索方式](#Elasticsearch多种搜索方式) 
       - [Elasticsearch聚合搜索](#Elasticsearch聚合搜索)
+    - [Elasticsearch分布式架构](#Elasticsearch分布式架构)
+      - [Elasticsearch基础分布式架构](#Elasticsearch基础分布式架构)
+          - [Elasticsearch对复杂分布式机制的透明隐藏特性](#Elasticsearch对复杂分布式机制的透明隐藏特性)
+          - [Elasticsearch的垂直扩容与水平扩容](#Elasticsearch的垂直扩容与水平扩容)
+          - [Elasticsearch增减节点时rebalance](#Elasticsearch增减节点时rebalance)
+          - [Elasticsearch的master节点](#Elasticsearch的master节点)
+          - [Elasticsearch节点平等的分布式架构](#Elasticsearch节点平等的分布式架构)
+      - [index分片原理](#分片原理)
+          - [shard&replica机制梳理](#Shard&replica机制梳理)
+      - [Elasticsearch横向扩容原理](#Elasticsearch横向扩容原理)
+          - [Elasticsearch分布式原理_横向扩容，如何超出扩容极限以及如何提升容错性](#Elasticsearch分布式原理_横向扩容，如何超出扩容极限以及如何提升容错性)
+          - [Elasticsearch容错机制：master选举，replace容错，数据恢复](#Elasticsearch容错机制：master选举，replace容错，数据恢复)
 - [Elasticsearch高手进阶篇](#Elasticsearch高手进阶篇)
     - [redis](#redis)
   
@@ -287,7 +299,7 @@ kibana安装
             "_source":["",""] :指定要查询出来的field
          }
 
-
+match_all:全部查询
 match:全文检索，将搜素词拆分为一个个词之后去倒排索引中进行匹配
 match_phrase(短语搜索) :要求输入的搜索串，必须在指定字段文本中，完全一模一样的，才能算匹配
 sort:排序
@@ -301,13 +313,21 @@ _source:指定要查询出来的field
 
     GET /index/type/_search
     {
+        "size":0,         // 去掉返回值里的hits 具体的document
+        "query"：""  // 查询条件之后在分组
         "aggs":{
-            "group_by_tags":{
-                "terms"{
-                    "filed":"vaue" //根据filed的分组
-                }
+            "group_by_tags":{       //聚合的别名
+                //分组下的操作
+                "terms":{
+                    "field":"vaue" //根据field的分组
+                    "order":{"group_by_tag1":desc/asc}  //按照内层聚合的结果降序排序
+                },
+                // 组内分组计算
+                "aggs":{
+                    "group_by_tag1":{
+                      }
+                    }
             }
-    
         }
     }
 
@@ -316,10 +336,75 @@ _source:指定要查询出来的field
     PUT /index/_mapping/type
     {
         "properties":{
-            "filed":{ //根据filed的设置
+            "field":{ //根据filed的设置
                 "type":"string",
-                "filed":"true",
+                "fielddata":"true",
             }
         }
         
     }
+
+### Elasticsearch分布式架构
+
+#### Elasticsearch基础分布式架构
+##### Elasticsearch对复杂分布式机制的透明隐藏特性
+
+    分片机制:我们将document插入到es集群中去，不用关心数据是怎么进行分片的，数据到哪个shard中
+    cluster discovery：新加入的node自动发现集群，并且加入进去还接受了部分数据
+    Shared 负载均衡:es会自动进行负载均衡（让每个node上具备差不多的shard数量），以保持每个节点均衡读写负载请求
+    share副本:rep1ica shard是primary. shard的副本
+    集群扩容:水平扩容
+    请求路由:节点对等
+    share重分配:集群rebalance
+
+##### Elasticsearch的垂直扩容与水平扩容
+
+    (1).垂直扩容：采购更强大的服务器。成本高，有瓶颈
+    (2).水平扩容：增加服务器的数量
+
+##### Elasticsearch增减节点时rebalance
+
+    总有一些服务器负载重一些，承载的数据和请求会大一些，当增加或者减少节点时，数据分片会重新rebalance，实现shard的负载均衡（让每个节点的数据量差不多）
+
+
+##### Elasticsearch的master节点
+（主要管理es的元数据）
+
+    (1)、创建或者删除索引
+    (2)、增加或者删除节点
+
+##### Elasticsearch节点平等的分布式架构
+
+    (1)、节点对等，每个节点都能接受所有请求
+    (2)、自动请求路由
+    (3)、响应收集
+
+#### 分片原理
+
+##### Shard&replica机制梳理
+
+    (1) index包含 多个shard，将多个shard分配到各个节点上去，每个shard存储一部分数据
+    (2)每个shard都是一个最小工作单元， 承载部分数据，1ucene实例， 完整的建立索引和处理请求的能力
+    (3)增减节点时，shard会自动在nodes中负载均衡
+    (4) primary shard和replica shard; ，每个document肯定只存在于某一个primary      shard以及其对应的rep1ica shard中， 不可能存在于多个primary shard
+    (5) rep1ica shard是primary. shard的副本， 负责容错，以及承担读请求负载
+    (6).primary shard的数量在创建索引的时候就固定了，replica shard的数量可以随时修改
+    (7).primary shard的默认数量是5，rep1ica默认是1:默认直10个shard; 5 primary shard, 5个replica, shard
+    (8) primary shard不能和自己的replica shard放在同一个节点上(否则节点宕机，primary shard和副本都丢失，起不到容错的作用)，但是可以和其他primary shard的 ep1ica shard放在同一一个节点上
+
+#### Elasticsearch横向扩容原理
+
+###### Elasticsearch分布式原理_横向扩容，如何超出扩容极限以及如何提升容错性
+
+    1、图解横向扩容过程，如何超出扩容极限，以及如何提升容错性
+    (1) primary&rep1ica 自动负载均衡，6个shard， 3 primary，3 replica
+    (2)每个node有更少的shard, I0/CPU/Memory资 源给每个shard分配更多，每个shard性能更好
+    (3) 扩容的极限， 6个shard (3 primary, 3 replica) ，最多扩 容到6台机案，每个shard可以占用单 台服务器的所有资源，性能最好
+    (4)超出扩容极限，动态修改rep1ica数量，9个shard (3primary， 6 rep1ica)，扩容到9台机器，比3台机器时，拥有3倍的读吞吐量
+    (5) 3台机器下，9个shard (3 primary, 6 replica) ，资源更少，但是容错性更好，最多容纳2台机器宕机，6个shard只能容纳1台机器宕
+
+##### Elasticsearch容错机制：master选举，replace容错，数据恢复
+
+    (1).容错第-步: master选举，自动选举另外一个node成为新的master ,承担起master的责任来
+    (2).容错第二步:新master ,将丢失掉的primary shard的某个replica shard提升为primary shard.此时cluster status会变为yellow ,因为primaryshard全都变成active了.但是,少了一个replica shard ,所以不是所有的replica shard都是active了.
+    (3).容错第三步:重启故障的node ,new master ,会将缺失的副本都是copy-份到该node上去。而且该node会使用之前已有的shard数据，只是同步- -下宕机之后发生过的修改。cluster status变为green,因为primary shard和replica shard都齐全了
