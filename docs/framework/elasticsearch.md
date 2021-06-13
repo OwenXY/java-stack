@@ -475,7 +475,7 @@ document
 
 1.第一次创建一个document的时候，它的_version内部版本号就是1;
 2.以后，每次对这个document执行修改或者删除操作，都会对这个_version版本号自动加1;哪怕是删除，也会对这条数据的版本号加1
-3.多线程并发更新数据时,先获取document数据和最新版本号， 只有当你提供的version与es中的，version-模一样的时候，才可以进行修改，只要不一样，就报错或执行retry策略（需要配置参数）;
+3.多线程并发更新数据时,先获取document数据和最新版本号， 只有当你提供的version与es中的，version-模一样的时候，才可以进行修改，只要不一样，就报错或执行retry策略（retry_ on_ conf1ict）;
 3.别的线程更新失败后，执行retry策略
 retry策略
 1、再次获取document数据和最新版本号
@@ -509,7 +509,8 @@ partial update语法：
 
     post /index/ type/id/_ update
     {
-    '要修改的少数几个fie1d即可，不需要全量的数据”
+    '要修改的少数几个fie1d即可，不需要全量的数据”：""，
+    "retry_ on_ conf1ict":"5"  //retry策略
     }
 
 般对应到应用程序中，每次的执行流程基本是这样的（和全量替换的原理一样）:
@@ -551,6 +552,10 @@ partial update相较于全量替换的优点
 
 partial update乐观锁并发控制原理
 
+1.第一次创建一个document的时候，它的_version内部版本号就是1;
+2.以后，每次对这个document执行修改或者删除操作，都会对这个_version版本号自动加1;哪怕是删除，也会对这条数据的版本号加1
+3.多线程并发更新数据时,先获取document数据和最新版本号， 只有当你提供的version与es中的，version-模一样的时候，才可以进行修改，只要不一样，就报错或执行retry策略（retry_ on_ conf1ict）;
+3.别的线程更新失败后，执行retry策略
 retry策略
 1、再次获取document数据和最新版本号
 2、基于最新版本号再次去更新，如果成功那么就ok了
@@ -601,8 +606,8 @@ mget批量查询API(很重要，性能优化的一种方式)
 
 
 
+mget的重要性
 
-3、mset的重要性
 可以说mget是很重要的，一 般来说，在进行查询的时候，如果一 次性要查询多条数据的话，那么一定要用batch批量操作的api
 尽可能减少网络开销次数，可能可以将性能提升数倍，其至数十倍，非常非常之重要
 
@@ -611,22 +616,26 @@ mget批量查询API(很重要，性能优化的一种方式)
 bulk批量增删改
 
 1、bulk语法
-POST /_ _bu1k，
-delete": {” index":" test_ index,，” type" :“ test_ type'“?”J
-create" :index" :” test_ index，”_ type' :” test_ type"，”_ id" :“ 12”} }test_ fie1d": " test12”}
-index": {_index":" test_ index' '，”_type" : "test_ _type” }}，test_ field" :auto-generate id test
-index" :_index" :” test_ index”_type”: "test_ type"， ”id":“2”}}'test_ fie1d”:" replaced test2”
-update" : {”_ index :“ test_ index'，“type”: "test_ _type”，”id": "1”， ”retry_ on_ conf1ict" :3} }
-{“doc" : {"test_ fie1d2” : "bulk test1"} }
+
+    POST /_bulk
+    delete": {” index":" test_ index,，” type" :“ test_ type'“?”J
+    create" :index" :” test_ index，”_ type' :” test_ type"，”_ id" :“ 12”} }test_ fie1d": " test12”}
+    index": {_index":" test_ index' '，”_type" : "test_ _type” }}，test_ field" :auto-generate id test
+    index" :_index" :” test_ index”_type”: "test_ type"， ”id":“2”}}'test_ fie1d”:" replaced test2”
+    update" : {”_ index :“ test_ index'，“type”: "test_ _type”，”id": "1”， ”retry_ on_ conf1ict" :3} }
+    {“doc" : {"test_ fie1d2” : "bulk test1"} }
 
 每一-个操作要两个json串， 语法如下:
 'action": { 'metadata"}}
 "data"}
 举例，比如你现在要创建一 个文档，放bulk里面，看起来会是这样子的:
-{" index": {"_ _index": "test_ index"，”type"，"test_ type"， " id":“1"}}
-{" test_ fie1d1":“ test1"，"test_ fie1d2": "test2"}
+
+    {" index": {"_ _index": "test_ index"，”type"，"test_ type"， " id":“1"}}
+    {" test_ fie1d1":“ test1"，"test_ fie1d2": "test2"}
+
 有哪些类型的操作可以执行呢?
-(1) delete: 删除一个文档
-(2) create: PUT /index/type/id/ create， 强制创建
-(3) index: 普通的put操作，可以是创建文档，也可以是全量替换文档
-. ( 4) update: 执行的partial update操作
+
+    (1) delete: 删除一个文档
+    (2) create: PUT /index/type/id/ create， 强制创建
+    (3) index: 普通的put操作，可以是创建文档，也可以是全量替换文档
+    ( 4) update: 执行的partial update操作
