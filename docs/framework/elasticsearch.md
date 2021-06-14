@@ -750,6 +750,7 @@ all: 要求我们作，必须所有的primary shard和replica shard都是活跃�
 quorum: 默认的值，要求所有的shard中， 必须是大部分的shard都是活跃的，可用的，才可以执行这个写操作
 
 (2) quorum机制， 写之前必须确保大多数shard都可用，
+
 quorum = int( (primary+number_of_replicas) / 2 ) + 1， 当number_of_replicas>1 quorum机制才生效
 quorum= int( (primary_number_of_replicas) / 2 )1、
 举个例子，3个primary, shard, number_of_replicas=1, 总共有3 + 3 * 1 = 6个shard 
@@ -760,6 +761,8 @@ quorum= int( (3+1)/2)
 3个primary, shard, rep1ica=1, 要求至少3个shard号active;
 3个shard按照之前学习的shard&replica机制，必须在不同的节点上，如果说只有1台机器的话，是不是有可能出现说3个shard都没法分配齐全，
 此时就可能会出现写操作无法执行的情况
+
+
 1个primary_ shard, replica=3, quorum=((1+3) / 2) + 1=3，要求1个primary shard + 3个rep1ica shard = 4个shard, 
 其中必须有3个shard是要处于active状态的。如果这个时候只有2台机器的话，会出现什么情祝呢?
 es提供了一 种特殊的处理场景，就是说当number_of_replicas> 1时才生效，因为假如说，你就一 个primary shard, replica=1, 此时就2个shard.
@@ -773,6 +776,18 @@ es提供了一 种特殊的处理场景，就是说当number_of_replicas> 1时�
 
 
 #### Document内部查询原理
+
+![img.png](images/document_query.png)
+
+    1、客户端发送请求到任意一个node, 成为coordinate. node, coordinate node对document进行路由 ，将请 求转发到对应的node,
+    2、此时会使用round-robin随机轮询算法，在primary shard以及其所有rep1ica中随机选择一个，让读请求负载
+    3、接收请求的node返回document给coordinate node
+    4、coordinate node返回
+
+和写不一样的是，写是找primary shard，读的时候primary shard和replica shard
+
+5、特殊情况: document如果还在建立索引过程中，可能只有primary shard有, 任何一个repl1ica shard都没有， 此时可能会导致无法读取到document, 但是document完成引建立z后，primary shard和replica shard就都有了
+
 
 
 #### BuilApi的奇特json格式与底层性能优化关系
