@@ -825,10 +825,13 @@ es提供了一 种特殊的处理场景，就是说当number_of_replicas> 1时�
 #### Search结果的深入解析
 
     took:整个搜索请求花费了多少毫秒
-    hits. total:本次搜索。委县了几条结果hits. maX score:本次搜索的所有结果中，最大的相关度分数是多少，每一条document对于search的相关度，越相关，score分数越大， 排位越靠前
+    hits. total:本次搜索返回了几条结果
+    hits. max_score:本次搜索的所有结果中，最大的相关度分数是多少，每一条document对于search的相关度，越相关，score分数越大， 排位越靠前
     hits. hits:默认查询前10条数据，完整数据，score降序排序
     shards; shards. fa1的条件(pri mary和replica全部挂掉)，不影响其他shard。默认情况下来说，一个搜索请求，会打到一个index的所有primary shard上去，当然了，每个primary shard都可能会有一个或多 个rep1ic shard, 所以请求也可以到primary shard的其中一个rep1ica shard上去。
-    timeout:默认无timeout, 1atency平衡icompleteness, 手动指定tineout，timeout 查询执行机制
+    timeout:默认无timeout, 1atency平衡icompleteness, 手动指定tineout，
+    timeout 查询执行机制:指定每个shard就在指定的timed out时间范围内，将搜索到的部分数据直接返回给client，而不是等到所有的数据都搜索出来了在返回
+    确保说一次搜索，可以在用户指定的time out时间内完成，为时间敏感的搜索应用提供良好的支持
 
 
 
