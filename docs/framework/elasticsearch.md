@@ -731,6 +731,14 @@ document路由到shard是什么意思？
 
 #### Document增删改内部原理
 
+![document_rud.png](images/document_rud.png)
+
+    (1)客户端选择一-个node发送请求过去，，这个node就 是coordinating. node (协调节点)
+    
+    (2) coordinating, node,对document进行路 由，,将请求转发给对应的node (有primary shard)
+    (3)实际的node.上的pri mary shard处理请求，然后将数据同步到replica node
+    (4) coordinating node, 如果发现primary node和所有replica node都搞定之后，就返回响应结果给客户端
+
 
 #### 写一致性原理以及quorum机制的深入解析
 
