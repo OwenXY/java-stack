@@ -694,17 +694,24 @@ document 总结
 #### Document数据路由原理
 document路由到shard是什么意思？
 
+我们知道一个index数据会被分为多片，每片都在一个shard中
+所以一个document，只能存放在一个shard中（primary shard）
+
+后面primary shard 会同步到replica shard上
+
+当客户端创建document的时候，此时需要决定，这个document
+要放在这个index哪个shard上。
 ![document_route.png](images/document_route.png)
 
 
 (2)路由算法: shard = hash(routing) % number_of_primary_shards举个例子，一个index有3个primary shard, PO, P1, P2
 
-每次增册改查一 个document的时候， 都会带过来一 个routing number,
-默认就是这个document的_ id (可能是手动指定，也可能是自动生成)routing =. id, 假设. id=1
+    每次增册改查一 个document的时候， 都会带过来一 个routing number,
+    默认就是这个document的_id (可能是手动指定，也可能是自动生成)routing =. id, 假设. id=1
+    
+    会将这个routing值， 传入一个hash函数中，产出- -个routing值的hash值， hash(routing) = 21
 
-会将这个routing值， 传入一个hash函数中，产出- -个routing值的hash值， hash(routing) = 21
-
-然后将hash函数产出的值对这个index的primary shard的数量求余数，21%3= 0就决定了，这个document就放在P0上。
+    然后将hash函数产出的值对这个index的primary shard的数量求余数，21%3= 0就决定了，这个document就放在P0上。
 
 决定一个document在哪个shard上， 最重要的一一个值就是routing值，默认是id,也可以手动指定，相同的routing值，
 
@@ -712,12 +719,13 @@ document路由到shard是什么意思？
 
 (3)_ id or custom routing value默认的routing就是id.
 
-也可以在发送请求的时候，手动指定一 个routing value, 比如说put /index/type/id?routing =useid
-
-手动指定routing value是很有用的， 可以保证说，某- -类document- -定被路由到一-个shard上去， 那么在后续进行应用级别的负载均衡，以及提升批量读取的性能的时候，是很有
+    也可以在发送请求的时候，手动指定一 个routing value, 比如说put /index/type/id?routing =useid
+    
+    手动指定routing value是很有用的， 可以保证说，某- -类document- -定被路由到一-个shard上去， 那么在后续进行应用级别的负载均衡，以及提升批量读取的性能的时候，是很有
 
 (4) primary shard数量不可变的谜底（路由算法只和primary. shards的数量有关）
 
+    private shard 一旦index建立，是不允许修改的，replica shard 是可以改变的
 
 #### Document增删改内部原理
 
