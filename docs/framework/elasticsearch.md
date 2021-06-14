@@ -37,8 +37,13 @@
       - [写一致性原理以及quorum机制的深入解析](#写一致性原理以及quorum机制的深入解析)
       - [Document内部查询原理](#Document内部查询原理)
       - [BuilApi的奇特json格式与底层性能优化关系](#BuilApi的奇特json格式与底层性能优化关系)
-
-
+    - [Elasticsearch搜索引擎](#Elasticsearch搜索引擎)
+      - [search结果的深入解析](#Search结果的深入解析)
+      - [muti-index&muti-type搜索模式解析以及搜索原理](#Muti-index&muti-type搜索模式解析以及搜索原理)
+      - [分页搜索以及deep paging性能问题深度图解](#分页搜索以及deep paging性能问题深度图解)
+      - [快速掌握query stringserach语法以及_all metadata原理揭秘](#快速掌握query stringserach语法以及_all metadata原理揭秘)
+      - [倒排索引的核心原理快速解密](#倒排索引的核心原理快速解密)
+    
 #### 
 - [Elasticsearch高手进阶篇](#Elasticsearch高手进阶篇)
     - [redis](#redis)
@@ -791,3 +796,38 @@ es提供了一 种特殊的处理场景，就是说当number_of_replicas> 1时�
 
 
 #### BuilApi的奇特json格式与底层性能优化关系
+
+1、bulk中的每个操作都可能要转发到不同的node的shard去执行
+2、如果采用比较良好的json数组格式
+允许任意的换行，整个可读性非常棒，读起来很爽，es拿到那种标准格式的ison串以后，要按照下述流程去进行处理
+(1)将json数组解析为ISONArray对象，这个时候，整个数据，就会在内存中出现一份-模一样的拷贝，-份数据是jison文本，一份数据是JSONArray对象2)解析json落组里的每个对每个请求中的document进行路由
+为路由到同一个shardE的多个请求，创建一个请求数组(4)将这个
+(5)将序列化后的请求数组发送到对应的节点上去
+
+3、耗费更多内存，更多的jvm gc开销
+我们之前提到过bulk size最佳大小的那个问题，--般建议说在几千条那样，然后大小在10MB左右，所以说，可怕的事情来了。假设说现在100个bulk请求发送到了一个节点上去，然后每个请求是10MB，100个请求，就是1000MB = 1GB， 然后每个请求的json都copy 份为jsonarray对象， 此时内存中的占用就会翻倍，就会占用2GB的内存， 甚至还不止。因为弄成jsonarrayZ后，还可能会多搞一些其他的数据结构，2GB+的内存占用。
+
+占用更多的内存可能就会积压其他请求的内存使用量，比如说最重要的搜索请求，分析请求，等等，此时就可能会导致其他请求的性能急速下降，
+另外的话，占用内存更多，就会导致java虚拟机的垃圾回收次数更多，跟频繁，每次要回收的垃圾对象更多，耗费的时间更多，导致es的java虚拟机停止工作线程的时间更
+
+现在的奇持格式
+(action:{meta"]}\n"data"}}n
+"action":(meta"}n'data"'}\r
+
+(1)不用将其转换为json对象，不会出现内存中的相同数据的拷见，直接按照换行往ison
+(2)对每两个组的json，读取meta,进行document路由
+(3)直接将对应的json发送到node上去
+
+5、最大的优势在于，不需要将ison数组解析为一个TSONArray对象， 形成一份大数据的拷贝，很费内存空间，尽可能地保证性的
+
+### Elasticsearch搜索引擎
+
+#### Search结果的深入解析
+
+#### Muti-index&muti-type搜索模式解析以及搜索原理
+
+#### 分页搜索以及deep paging性能问题深度图解
+
+#### 速掌握query stringserach语法以及_all metadata原理揭秘
+
+#### 倒排索引的核心原理快速解密
