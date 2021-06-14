@@ -725,6 +725,8 @@ document路由到shard是什么意思？
 
 (4) primary shard数量不可变的谜底（路由算法只和primary. shards的数量有关）
 
+    因为shard = hash(routing) % number_of_primary_shards决定了document 在哪个shard上，
+    如果改变，导致数据不在之前的shard上，导致查询的时候，无法找到，就会间接导致数据丢失。
     private shard 一旦index建立，是不允许修改的，replica shard 是可以改变的
 
 #### Document增删改内部原理
