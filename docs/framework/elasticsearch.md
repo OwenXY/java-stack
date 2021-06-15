@@ -6,6 +6,7 @@
     - [Elasticsearch快速入门](#Elasticsearch快速入门)
       - [Elasticsearch功能适用场景特点](#Elasticsearch功能适用场景特点)
       - [Elasticsearch核心概念](#Elasticsearch核心概念)
+      - [Elasticsearch基本操作](#Elasticsearch基本操作)
 - [Elasticsearch高手进阶篇](#Elasticsearch高手进阶篇)
     - [redis](#redis)
   
@@ -51,3 +52,5 @@
     7.shard：单台机器无法存储大量数据,es可以将一个索引中的数据切分为多个shard，分布在多台服务器上存储.有了shard就可以横向扩展，存储更多数据,让搜索和分析等操作分布到多台机器上，执行速度快,提升吞吐量和性能.
     8.replica:粉盒一个服务器随机可能出现故障或者宕机.因此可以为每个shard创建多个replica副本,replica可以在shard故障时候提供备用，保证数据不丢失。多个replica哈可以提升搜索作用的吞吐量和性能。
     primary shard(建立索引时候一次设置,不能修改,默认5个),replica shard（随时修改数量,默认1个）,默认每个索引10个shard.5个primary shard。5个replica shard。最小高可用配置，是两台server.
+
+#### Elasticsearch基本操作
