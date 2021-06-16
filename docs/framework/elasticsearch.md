@@ -45,8 +45,10 @@
       - [mapping](#mapping)      
       - [倒排索引的核心原理快速解密](#倒排索引的核心原理快速解密)
       - [分词器](#分词器)
-      - [queryDSL](queryDSL)
-    
+      - [queryDSL](#QueryDSL)
+      - [对stringfield排序](#对StringField排序)
+      - [相关度评分TF&IDF算法](#相关度评分TF&IDF算法)
+      - [docValues](#DocValues正排索引)
 #### 
 - [Elasticsearch高手进阶篇](#Elasticsearch高手进阶篇)
     - [redis](#redis)
@@ -929,7 +931,7 @@ normalization (提升recal1召回率)
 
 
 
-#### queryDSL
+#### QueryDSL
 
 （2）、query DSL（Domain Specified Language 特定领域的语言） 基于Http request body请求体，可以用json格式构建语法，可以构建各种复杂的语法
 
@@ -955,7 +957,7 @@ normalization (提升recal1召回率)
             "_source":["",""] :指定要查询出来的field
          }
 
-bool:组合查询
+bool:组合查询，其他的查询放在bool下
 must:必须匹配
 should：可以匹配也可以不匹配
 must_not:不要匹配
@@ -980,3 +982,76 @@ query,会去计算每个document相对于搜索条件的相关度，并按照相
 fi1ter,不需要计算相关度分数:不需要按照相关度分数进行排序，同时还有内置的自动cache最常使用filter的功能
 query,相反，要计算相关度分数，按照分数进行排序，而且无法cache结果
 
+
+
+不要bool，只要filter的话，
+
+    {
+    "query":{ //查询
+      “constant_score”:{
+        "filter" :{ // 过滤
+        "range"{
+        "price" :{"gt",""}
+        }
+       },
+   
+    }
+ 
+定位DSL语法不合法的原因
+
+    GET /index/type/_validate/query?explain
+    {
+        DSL语句
+    }
+
+#### 对StringField排序
+    
+如果对string file 排序，结果往往是不准确的，因为分词后是多个单词，再排序就不是我们想要的结果
+通常解决办法是，将一个string filed索引两次，一个分词用来搜索，另一个不分词，用来排序
+
+方式一：
+
+    PUT /index/type/
+    {
+       "mapping":{
+          type:text, /第一次设置分词
+          fields:{    //第二次设置不分词
+            "raw":{
+                type:string,
+                index:"not_analyzed"
+            },
+          "fielddata":true  //设置正排索引，为了排序
+         }
+       }
+    }
+
+#### 相关度评分TF&IDF算法
+
+relevance score算法， 简单来说，就是计算出，-个索引中的文本，与搜索文本，他们之间的关联匹配程度
+
+Elasticsearch 使用的是 term frequency/ inverse document frequency算法， 简称为TF /IDF算法
+
+Term frequency: 搜索文本中的各个词条在fie1d文本中出现了多少次，出现次数越多，就越相关
+Inverse document frequency: 搜索文本中的各个词条在整个索引的所有文档中出现了多少次，出现的次数越多，就越不相关
+Field-1ength norm: fie1d长度， fie1d越长， 相关度越弱
+
+查看_score分数
+GET /test_index/test_type/_search?explain
+{
+query”: {
+'term”: {
+"test_filed":""
+}
+}
+}
+
+
+#### DocValues正排索引
+
+搜索的吋候，要依靠倒排索引;排序的吋候，需要依靠正排索引，看到毎个document的毎个field, 然后迸行排序，
+所渭的正排索引,其是就是doc values
+在建:立索引的吋候，-一方面会建立倒排素引，以供搜索用; 一方面会建立正排索引，也就是doc values, 以供排序，聚合,辻濾等操作使用
+
+doc values是被保存在磁盘上的。
+
+如果内存足够，os会自劫将其缓存在内存中，性能逐是会很高;如果内存不足够，os会将其写入磁盈上
