@@ -39,10 +39,13 @@
       - [BuilApi的奇特json格式与底层性能优化关系](#BuilApi的奇特json格式与底层性能优化关系)
     - [Elasticsearch搜索引擎](#Elasticsearch搜索引擎)
       - [search结果的深入解析](#Search结果的深入解析)
-      - [muti-index&muti-type搜索模式解析以及搜索原理](#Muti-index&muti-type搜索模式解析以及搜索原理)
+      - [Multi-index&multi-type搜索模式解析以及搜索原理](#Multi-index&multi-type搜索模式解析以及搜索原理)
       - [分页搜索以及deep paging性能问题深度图解](#分页搜索以及deep paging性能问题深度图解)
       - [快速掌握query stringserach语法以及_all metadata原理揭秘](#快速掌握query stringserach语法以及_all metadata原理揭秘)
+      - [mapping](#mapping)      
       - [倒排索引的核心原理快速解密](#倒排索引的核心原理快速解密)
+      - [分词器](#分词器)
+      - [queryDSL](queryDSL)
     
 #### 
 - [Elasticsearch高手进阶篇](#Elasticsearch高手进阶篇)
@@ -835,10 +838,145 @@ es提供了一 种特殊的处理场景，就是说当number_of_replicas> 1时�
 
 
 
-#### Muti-index&muti-type搜索模式解析以及搜索原理
+#### Multi-index&multi-type搜索模式解析以及搜索原理
+
+![img.png](images/Multi-index.png)
+
+
 
 #### 分页搜索以及deep paging性能问题深度图解
 
-#### 速掌握query stringserach语法以及_all metadata原理揭秘
+![img.png](images/deep_paging.png)
+
+deep paging:搜索特别深，总共6w数据，每个shard分了2w，每页10条数据，
+这个时候你要搜索到1000页，每个shard都要返回10010条数据，那么会返回30030条数据，排序，
+汇总之后，取第1000页的数据，会出现性能问题
+
+#### 速掌握query string search语法以及_all metadata原理揭秘
+
+基础语法：
+    GET /index/type/_search?q=filed:value
+_all metadata原理：
+    es中的_all元数据，在建立索引的时候，我们插入一条document，它里面包含了多个field,此时es会将多个field值串联起来
+    作为_all field的值，同时建立索引
+    后面如果在搜索的时候，没有对某个filed指定搜索，就默认搜_all field的,其中是包含了所有field的值
+
+#### mapping
+
+mapping:自动或者手动对index建立数据结构和相关配置。mapping里包含了每个field对应的数据类型以及如何分词和搜索的行为。
+dynamic mapping:自动为我们建立index，type，以及对应的mapping。mapping里包含了每个field对应的数据类型以及如何分词。
+
+
+
+    (1)往es里面直接插入数据:会自动建立索引。同时建立type以及对应的mapping
+    (2) mapping中就自动定义每个filed的数据类型
+    (3)不同的数据类型(正如说text和date)，可能有的是exact value, full text
+    (4)exact value在建立倒排索引的时候，分词的时候，是将整个值-起作-一个关键词建立到倒排索引中的: full text, 会经历各种各样的处理，分词，normaliztion (时态转换，同义词转换，天小弓转换)，才会建立到倒排索引中
+    (5)同时呢，exact value和fu11 text类型的filed就决定了，在一个搜索过来的时候，对exact value fie1d或者是full text. filed进行搜索的行为也是不一样的，会跟建立倒排索引的行为保持一致;比如说exact value搜索的时候，  直接按照整索引行为，包括分词器，等等
+    (6)可以用dynamic mapping让其自动建立mapping,包括自动设置数据类型，也可以手动index和type的mapping, 自己对各filed进存设置，包括数据类型，包括数据类型，包括分词等等
+
+总结：mapping决定了field数据类型，倒排索引的行为，还有搜索的行为。
+
+mapping数据类型：
+    
+    text，byte，short,integer,long float ,double ,boolean ,date
+
+查询 mapping
+
+    GET index/_mapping/type
+
+只能创建index时手动指定mapping或者添加field mapping，不能修改field mapping
+
+string默认是分词的，也可以手动指定分词行为
+analyzed：分词
+no_analyzed:不分词
+no：不分词不被搜索
+
+创建索引指定filed mapping
+
+![img.png](images/mapping.png)
+
+添加field mapping
+
+![img.png](images/add_field_mapping.png)
+
+查看分词效果
+
+![img.png](img.png)
+
+es支持两种模式的搜索：
+full_text:全文检索 
+exact_value:精确搜索
+不同的filed 有点可能是full_text 有的可能是exact_value
+query string search 会用跟倒排索引一样的分词器去进行分词
 
 #### 倒排索引的核心原理快速解密
+
+倒排索引最简单的建立过程
+
+![img.png](images/daopaisuoyin.png)
+
+normalization：在建立倒排索引的时候，会执行一个操作，也就是说对拆分出来的各个单词进行处理
+以提升后面搜索的时候能够搜到相关联文档的概率
+
+我们在搜索的时候，会把词进行拆分，把每一个词去倒排索引中去匹配。
+
+#### 分词器
+
+
+切分词语，
+normalization (提升recal1召回率)
+
+
+
+#### queryDSL
+
+（2）、query DSL（Domain Specified Language 特定领域的语言） 基于Http request body请求体，可以用json格式构建语法，可以构建各种复杂的语法
+
+        例如：  
+        {
+            "query":{ //查询
+            “match_all”:{ //
+            },
+            "filter" :{ // 过滤
+                "range"{
+                    "price" :{"gt",""}
+                }
+            }
+        }
+            "sort":[ 排序
+            {
+            "price":"desc"
+            }
+            ]
+            "from":1, 查询游标
+            "size":2 查询数量
+            }
+            "_source":["",""] :指定要查询出来的field
+         }
+
+bool:组合查询
+must:必须匹配
+should：可以匹配也可以不匹配
+must_not:不要匹配
+match_all:全部查询
+match:全文检索，将搜素词拆分为一个个词之后去倒排索引中进行匹配
+match_phrase(短语搜索) :要求输入的搜索串，必须在指定字段文本中，完全一模一样的，才能算匹配
+term:不分词去倒排索引中匹配（比较少用，建立mapping的时候，可以指定那个field不分词）
+terms:不分词去倒排索引中匹配（比较少用，建立mapping的时候，可以指定那个field不分词）
+exists：搜索词不能为空
+sort:排序
+highlight:高亮
+from:查询游标
+size：查询数量
+_source:指定要查询出来的field
+
+
+filter,仅仅只是按照搜索条件过滤出需要的数据而已，不计算任何相关度分数，对相关度没有任何影响
+query,会去计算每个document相对于搜索条件的相关度，并按照相关度进行排序
+-般来说，如果你是在进行搜索，需要将最匹配搜索条件的数据先返回，那么用query; 如果你只是要根据一些条件筛选出一部分数据，不关注其排序。那么用filter
+除非是你的这些搜索案件，你希望越符合这些搜索条件的document起排在前面返回，那么这些搜索条件放在query中;如果你不希望-一些搜索条 件来影响你的document排序，那么filter中即可
+3、fi1ter与 query性能
+fi1ter,不需要计算相关度分数:不需要按照相关度分数进行排序，同时还有内置的自动cache最常使用filter的功能
+query,相反，要计算相关度分数，按照分数进行排序，而且无法cache结果
+
