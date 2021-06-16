@@ -48,7 +48,9 @@
       - [queryDSL](#QueryDSL)
       - [对stringfield排序](#对StringField排序)
       - [相关度评分TF&IDF算法](#相关度评分TF&IDF算法)
-      - [docValues](#DocValues正排索引)
+      - [doc Values](#DocValues正排索引)
+      - [query phase](#QueryPhase)
+      - [fetch phase](#FetchPhase)
 #### 
 - [Elasticsearch高手进阶篇](#Elasticsearch高手进阶篇)
     - [redis](#redis)
@@ -1055,3 +1057,20 @@ query”: {
 doc values是被保存在磁盘上的。
 
 如果内存足够，os会自劫将其缓存在内存中，性能逐是会很高;如果内存不足够，os会将其写入磁盈上
+
+
+#### QueryPhase
+
+![img_1.png](images/queryPhase.png)
+
+(1)搜索请求发送到某- -个coordinate node, 构构建一个priori ty queue, 长度以paging操作from和si ze为准，默认为10
+(2) coordinate_ node将请求转发到所有shard,每个shard本地搜索，并构建一. 个本地的priority queue
+(3)各个shard将自己的priority queue返回给coordinate node， 并构建一 个全局的priority queue
+
+#### FetchPhase
+
+![img_1.png](images/FetchPhase.png)
+
+（1）coordinate node构建完priority queue之后，就发送mget请求去所有shard上获取对应的document
+（2）各个shard将document返回给coordinate node
+（3）coordinate node将合并后的document结果返回给client客户端
