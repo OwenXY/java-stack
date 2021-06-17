@@ -51,6 +51,8 @@
       - [doc Values](#DocValues正排索引)
       - [query phase](#QueryPhase)
       - [fetch phase](#FetchPhase)
+      - [搜索相关参数梳理以及bouncing results问题的解决方案](#搜索相关参数梳理以及bouncingresults问题的解决方案)
+      - [scoll技术滚动搜索大量数据](#Scoll技术滚动搜索大量数据)
 #### 
 - [Elasticsearch高手进阶篇](#Elasticsearch高手进阶篇)
     - [redis](#redis)
@@ -1074,3 +1076,47 @@ doc values是被保存在磁盘上的。
 （1）coordinate node构建完priority queue之后，就发送mget请求去所有shard上获取对应的document
 （2）各个shard将document返回给coordinate node
 （3）coordinate node将合并后的document结果返回给client客户端
+
+
+#### 搜索相关参数梳理以及bouncingresults问题的解决方案
+
+1、preference
+决定了哪些shard会被用来执行搜索操作
+_primary,_ primary_ first,_ 1oca1，_ on1y_ _node:xyz，_ prefer_ node:xyz，_ shards:2,3
+bguncing. results问题，两个document排序， fie1d值相同; 不同的shard上，可能排序不同;每次请求轮询打到不同的replica shard上; 每次页面上看到的搜索结果的排序都不一
+样。这就是bouncing resu1t， 也就是跳跃的结果。
+搜索的时候，是轮询将搜索请求发送到每一-个replica shard (primary shard)，但是在不同的shard上，可能document的排序不同
+解决方案就是将preference设置为一个字符串，比如说user_ id, 让每个user每次搜索的时候，都使用同- -个replica shard去执行， 就不会看到bouncing results了
+2、timeout, 已经讲解过原理了，主要就是限定在一定时间内，将部分获取到的数据直接返回，避免查询耗时过张
+3、 routing, document文档路由， id路由，routing=user id, 这样的话可以让同一个user对应的数据到一个shard上去
+4、search_ type
+default: query_ _then_ _fetch,
+dfs_ query_ _then_ fetch,可以提升revel ance sort精准度
+
+
+#### Scoll技术滚动搜索大量数据
+
+如果一次性要查出来比如10万条数据，那么性能会很差，此时一般会采取用sco11滚动查询，一批一批的查，直到所有数据都查询完处理完
+使用sco11滚动搜索，可以先搜索一批数据，然后下次再搜索一批数据，以此类推，直到搜索出全部的数据来，
+
+scoll搜索会在第一次搜索的时候，保存一一个当时的视图快照，之后只会基于该旧的视图快照提供数据搜索，如果这个期间数据变更,是不会让用户看到的
+采用基于_doc进行排序的方式，性能较高
+每次发送scroll请求，我们还需要指定一个sco11参数， 指定一个时间窗口， 每次搜索请求只要在这个时间窗口内能完成就可以了
+GET /index/_search?scroll=1m
+"query": {
+  "metch_a11": {},
+"sort":["_doc"],
+"size": 1000
+」
+获得的结果会有一个scrollid, 下一次再发送scroll请求的时候，必须带上这个scrollid .
+GET /_search/scro11
+"scroll" :
+” scroll
+“cXV1 cn1UaGVuRmV0Y2g7NTsxMDk5NDpkUmpiR2F j0F NhNn1CM 1ZDMWpWYnRR0zEw0Tk 10mRSamJHYWM 4U2E2eUI zVkl{xa1Zi dFE7MTA50TM6ZF JqYkdhYzhTYTZ5Q jNWQzF qVmJOUTsxMTE5MDpBVUtwN21 x
+c1FLZV8yRGVjW1I2QUVB0zEw0Tk20mRSamJHYWM4U2E2eUI zVkMxa1Zi dFE7MDs='
+size会发送给每个shard, 因此每次最多会返回size * primary shard条数据
+
+
+scoll，看起来挺像分页的，但是其实使用场景不-样。
+分页主要是用来一页一页搜索,给用户看的;
+sco11主要是用来一批一批检索数据，让系统进行处理的
