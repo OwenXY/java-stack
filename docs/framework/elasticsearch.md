@@ -53,6 +53,12 @@
       - [fetch phase](#FetchPhase)
       - [搜索相关参数梳理以及bouncing results问题的解决方案](#搜索相关参数梳理以及bouncingresults问题的解决方案)
       - [scoll技术滚动搜索大量数据](#Scoll技术滚动搜索大量数据)
+    - [Elasticsearch索引管理](#Elasticsearch索引管理)
+      - [索引的增删改查](#索引的增删改查)
+      - [修改分词起以及定制分词器](#修改分词起以及定制分词器)
+      - [深入探索type底层数据结构](#深入探索type底层数据结构)
+      - [mapping root object深入解析](#MappingRootObject深入解析)
+      - [定制化自己的dynamic mapping策略](#定制化自己的dynamicMapping策略)
 #### 
 - [Elasticsearch高手进阶篇](#Elasticsearch高手进阶篇)
     - [redis](#redis)
@@ -1120,3 +1126,16 @@ size会发送给每个shard, 因此每次最多会返回size * primary shard条�
 scoll，看起来挺像分页的，但是其实使用场景不-样。
 分页主要是用来一页一页搜索,给用户看的;
 sco11主要是用来一批一批检索数据，让系统进行处理的
+
+
+### Elasticsearch索引管理
+
+#### 索引的增删改
+
+#### 修改分词起以及定制分词器
+
+#### 深入探索type底层数据结构
+
+#### MappingRootObject深入解析
+
+#### 定制化自己的dynamicMapping策
