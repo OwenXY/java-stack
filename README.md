@@ -117,6 +117,7 @@
 - [网关](/docs/programme/网关.md)
 - [高并发与高可用](/docs/programme/高并发与高可用.md)
 - [链路追踪](/docs/programme/链路追踪.md)
+- [秒杀架构](/docs/programme/秒杀架构.md)
 ### 数据库
 - [mysql](/docs/db/mysql.md)
 - [redis](/docs/db/redis.md)
