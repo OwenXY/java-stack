@@ -906,7 +906,7 @@ no：不分词不被搜索
 
 查看分词效果
 
-![img.png](img.png)
+![img.png](images/sehngchanzhexierushuju.png)
 
 es支持两种模式的搜索：
 full_text:全文检索 
