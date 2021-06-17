@@ -1063,9 +1063,9 @@ doc values是被保存在磁盘上的。
 
 ![img_1.png](images/queryPhase.png)
 
-(1)搜索请求发送到某- -个coordinate node, 构构建一个priority queue, 长度以paging操作from和size为准，默认为10
-(2) coordinate_node将请求转发到所有shard,每个shard本地搜索，并构建一. 个本地的priority queue
-(3)各个shard将自己的priority queue返回给coordinate node， 并构建一 个全局的priority queue
+(1)搜索请求发送到某一个coordinate node, 构构建一个priority queue, 长度以paging操作from和size为准，默认为10
+(2) coordinate_node将请求转发到所有shard,每个shard本地搜索，并构建一个本地的priority queue
+(3)各个shard将自己的priority queue返回给coordinate node， 并构建一个全局的priority queue
 
 #### FetchPhase
 
