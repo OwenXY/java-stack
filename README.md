@@ -1,16 +1,23 @@
 # Java技术栈笔记
 
-[![reading](https://badgen.net/badge/books/read%20together/cyan)]
-[![coding](https://badgen.net/badge/leetcode/coding%20together/cyan)]
-[![sharing](https://badgen.net/badge/readers/share%20together/cyan)
-[![stars](https://badgen.net/github/stars/doocs/wulimax/reactApp)]
-[![forks](https://badgen.net/github/forks/wulimax/reactApp)]
-[![contributors](https://badgen.net/github/contributors/wulimax/reactApp)]
-[![help-wanted](https://badgen.net/github/label-issues/wulimax/reactApp/help%20wanted/open)]
-[![issues](https://badgen.net/github/open-issues/wulimax/reactApp)]
+# Java技术栈笔记
 
 ### 内容说明：
-左林林个人文档
+
+本仓库存放的是个人整理笔记
+
+### Java技术栈笔记
+
+本仓库存放的是个人整理笔记
+
+
+![周冬雨](/images/zhoudongyu_1.jpg)
+![周冬雨](/images/zhoudongyu_2.jpg)
+
+
+
+### 内容说明：
+
 
 ## 目录
 
