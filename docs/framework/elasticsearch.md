@@ -59,10 +59,15 @@
       - [深入探索type底层数据结构](#深入探索type底层数据结构)
       - [mapping root object深入解析](#MappingRootObject深入解析)
       - [定制化自己的dynamic mapping策略](#定制化自己的dynamicMapping策略)
-#### 
 - [Elasticsearch高手进阶篇](#Elasticsearch高手进阶篇)
-    - [redis](#redis)
-  
+    - [深度揭秘搜索技术](#深度揭秘搜索技术)
+    - [IK中文分词器](#IK中文分词器)
+    - [深入聚合数据分析](#深入聚合数据分析)
+    - [数据建模实战](#数据建模实战)
+    - [完成建议](#完成建议)
+    - [生产实践-集群](#生产实践集群)
+    - [Elasticsearch性能调优](#Elasticsearch性能调优)
+    
 # Elasticsearch
 
 ## Elasticsearch核心知识入门篇
@@ -1138,4 +1143,254 @@ sco11主要是用来一批一批检索数据，让系统进行处理的
 
 #### MappingRootObject深入解析
 
-#### 定制化自己的dynamicMapping策
+#### 定制化自己的dynamicMapping策略
+
+## Elasticsearch高手进阶篇
+### 深度揭秘搜索技术
+
+TermFilter
+
+GET /index/_search
+{
+    "query" : {
+        constant_score:{
+            filter:{bool:{
+         }
+    }
+}
+}
+}
+    
+    es新版本内置的建立对于text类型的filed，会建立两次索引，一个是分词的，另一个是不分词的，不分词的是基于field.keyword,最多保留256个字符直接一个字符串放入到倒排索引中。
+    teamquery：根据exact value进行搜索，数字 boolean 日期有天然支持
+    text类型的filed需要建立索引是指定not_analyzed,才能用terms
+    新版本中设置field为keyword和not_analyzed一样就是不分词
+    term 匹配一个值
+    terms 匹配多个值
+
+全文检索多字段搜索
+
+![img.png](images/duoziduansousuo.png)
+
+手动控制全文检索的精准度
+
+![img.png](images/convert.png)
+
+boost的细粒度搜索条件控制
+
+![img.png](images/boost.png)
+
+
+多shard场景下 relevance score 不准确问题大揭秘
+
+    如何解决该问题？    
+    生产环境下，数据量大尽可能的实现均匀分配
+    测试环境下，将所有的primary设置为1
+    测试环境下搜索附带search_type = dfs_query_then_query参数，会将local IDF取出来计算global IDF
+
+基于dis_max 实现best_field策略进行多字段搜索
+
+    dix_max取某一个query最大的分数
+![img.png](images/best_field.png)
+
+基于tie_ breaker参数优化dis_ max搜索效果
+
+    使用tie_ breaker参数的意义在于将其他query分数乘以tie_ breaker 综合与
+    最高分数的那个query，综合一起计算，除了最高分外将其他query的分数也考虑进去
+
+    GET /index/_search
+    {
+        "query":{
+        "dis_max":{
+            "queries"{
+         }
+        }  ,
+        tie_ breaker:0.3
+    }
+    
+    }
+
+实战基于multi match语法实现dis_max+tie_breaker
+
+    GET / index/_search
+        {
+        query":{
+          multi_match":{
+            "query":"",
+             type:"best_field",
+             "tie_breaker":0.3,
+            "minimum_should_match":50%
+         }
+    }
+
+等价于 
+
+    GET /index/_search
+    {
+        "query":{
+        "dis_max":{
+            "queries"{  
+            "query":"aaa",
+             filed:["field1","field2"],
+            "minimum_should_match":50%
+            "boost":2
+         }
+        }  ,
+        tie_ breaker:0.3
+    }
+    
+    }
+    minimum_should_match:去长尾，控制搜索的精准度，只要匹配到一定数量的关键数据才能返回
+
+基于multi_ match+most field策略进行multi-field搜索
+
+    GET / index/_search
+        {
+        query":{
+          multi_match":{
+            "query":"",
+              filed:["field1","field2"],
+             type:"most_field",
+             "tie_breaker":0.3,
+            "minimum_should_match":50%
+         }
+    }
+
+  与best_fields的区别
+   
+    1.best_fields是对多个field进行搜索，搜索挑选某个field匹配度最高的那个分数，同时在多个query最高分相同的情况下，在一定
+    程度上考虑其他query的分数。简单来说，你对多个field进行搜索，就想搜索到某一个field尽可能的包含更多关键字的数据
+    优点：通过best_fields策略，以及综合考虑其他field，还有minimum_should_match，可以尽可能精准地将匹配结果推送到最前面
+    缺点：除了那些精准匹配的结果，其他差不多大的结果，排序结果不太均匀
+    实际的例子，百度之类的搜索引擎，最匹配的在前面，但是其他的就没有什么区分度了
+    2.most_fields,综合多个field一起进行搜索，尽可能多的让所有field的query参与到总分计算中来，此时就会是个大杂烩结果不一定精准，
+    某一个document的一个field包含了多个关键字，但是因为有其他document有更多的field匹配到了，所以排在了前面；所以需要建立sub_title.std这样的field，
+    尽可能的让某一个field匹配到query string，贡献更高的分数，将更精准的结果拍到前面
+    优点：尽可能的匹配更多的field的结果推送到前面整个结果是比较均匀分布的
+    缺点：可能那些精准匹配的结果无法推送到到前面
+    实际的例子wiki，明显就是most_fields策略，搜索的结果比较均匀，但是翻好几页才能找到最匹配的结果
+
+使用most_ fields策 略进行cross-fields search弊端大揭秘
+
+使用copy_ to 定制组合field解决cross- -fields搜索弊端
+
+使用原生cross-field技术解决搜索弊端
+
+
+phrase matching搜索技术
+
+    match query 做全文检索时，只能搜索包含这些次的document，
+    如果需要这些词里得很近的document，那就要给他一个更高的relevance score 这里
+    就涉及到proximity match 近似匹配
+     
+    GET /index/_search
+    {
+        "query":{
+        match_phrase:{
+            "title":{
+            "query":"java spark",
+            "slop":1
+        }
+      }
+     }
+    }
+    slop:query string搜索文本中的几个term，要经过多少次移动才能与一个document匹配 
+    其实加了phrase match 就是 proximity match 近似匹配
+
+混合使用match和近似匹配实现召回率与精准度的平衡
+
+使用rescoring机制优化近似匹配搜索的性能
+
+![img.png](images/rescoring.png)
+
+![img.png](images/chongdafen.png)
+
+实战前缀搜索、通配符搜索、正则搜索等技术
+
+    前缀搜索
+
+        GET /index/_search/
+        {
+            "query":{
+             "prefix":{
+                "field":"value"
+            }
+          }
+        }
+    prefix query 不计算relevance score 与prefix filter 唯一区别就是
+    filter 会cache bitset
+    前缀越短，要处理的doc越多，性能越差，尽可能的用长前缀搜索
+     
+    通配符搜索：
+    跟前缀搜索类似，功能更加强大
+
+    GET /index/_search/
+    {
+    "query":{
+      "wildcard":{
+          "field":"value"
+          }
+       }
+    }
+   
+     正则搜索
+       GET /index/_search/
+     {
+        "query":{
+          "regexp":{
+              "field":"value"
+              }
+           }
+      }
+
+    wildcard 和regexp和prefix原理一致，都会扫描整个索引，性能很差
+
+实战match_phrase_prefix实现search-time搜索推荐（少用）
+
+    match_phrase_prefix原理跟match_phrase类似，唯一的区别就是把最后一个term超过这个数量的就不需要匹配了，限定性能
+    也可以指定slop，但是最后一个term会最为前缀
+     max_expansions:指定prefix最多匹配多个term，超过这个数量就不再匹配了，限定性能
+       GET /index/_search/
+     {
+        "query":{
+          "match_phrase_prefix":{
+              "field":"{
+                    "query":"value1 value2",
+                    "slop":"10",
+                    "max_expansions":50,
+                 }
+              }
+           }
+      }
+    默认情况下，前缀要扫描所有的倒排索引中的term，去找这个词打头的，但是这样性能太差，可以用max_expansions限定，最对匹配多少个。就停止搜索了。
+
+实战通过ngram分词机制实现index-time搜索推荐
+
+![img.png](images/ngram.png)
+
+深入揭秘TF&IDF算法以及向量空间模型算法
+
+
+深入揭秘lucene的相关度分数算法
+
+
+实战掌握四种常见的相关度分数优化方法
+
+
+实战用function_ score自定 义相关度分数算法
+
+实战掌握误拼写时的fuzzy模糊搜索技术
+![img.png](images/fuzzy.png)
+
+
+### IK中文分词器
+
+### 深入聚合数据分析
+
+### 数据建模实战
+
+### 完成建议
+
+### 生产实践集群
+
+### Elasticsearch性能调优
