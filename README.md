@@ -1,6 +1,6 @@
 # Java技术栈笔记
 
-[![reading](https://badgen.net/badge/books/read%20together/cyan)]
+[![reading](https://image.baidu.com/search/detail?ct=503316480&z=undefined&tn=baiduimagedetail&ipn=d&word=%E5%91%A8%E5%86%AC%E9%9B%A8&step_word=&ie=utf-8&in=&cl=2&lm=-1&st=undefined&hd=undefined&latest=undefined&copyright=undefined&cs=68937915,1558979095&os=3109903788,2958222188&simid=0,0&pn=4&rn=1&di=65560&ln=1776&fr=&fmq=1624527144145_R&fm=&ic=undefined&s=undefined&se=&sme=&tab=0&width=undefined&height=undefined&face=undefined&is=0,0&istype=0&ist=&jit=&bdtype=0&spn=0&pi=0&gsm=0&objurl=https%3A%2F%2Fgimg2.baidu.com%2Fimage_search%2Fsrc%3Dhttp%253A%252F%252Finews.gtimg.com%252Fnewsapp_match%252F0%252F12063797535%252F0.jpg%26refer%3Dhttp%253A%252F%252Finews.gtimg.com%26app%3D2002%26size%3Df9999%2C10000%26q%3Da80%26n%3D0%26g%3D0n%26fmt%3Djpeg%3Fsec%3D1627119143%26t%3Defc4a7557550412ae2bce50bf2f90030&rpstart=0&rpnum=0&adpicid=0&nojc=undefined)]
 [![coding](https://badgen.net/badge/leetcode/coding%20together/cyan)]
 [![sharing](https://badgen.net/badge/readers/share%20together/cyan)]
 [![stars](https://badgen.net/github/stars/doocs/wulimax/reactApp)]
