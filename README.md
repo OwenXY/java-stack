@@ -12,7 +12,7 @@
 
 
 ![周冬雨](/images/zhoudongyu_1.jpg)
-![周冬雨](/images/zhoudongyu_2.jpg)
+
 
 
 
