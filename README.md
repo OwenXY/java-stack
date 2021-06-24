@@ -1,8 +1,13 @@
 # Java技术栈笔记
 
-![reading](https://www.google.com/imgres?imgurl=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2F5%2F55%2F%25E5%2591%25A8%25E5%2586%25AC%25E9%259B%25A8_-_2017%25E5%25BE%25AE%25E5%258D%259A%25E7%2594%25B5%25E5%25BD%25B1%25E4%25B9%258B%25E5%25A4%259C%25283%2529_-_cropped.jpg&imgrefurl=https%3A%2F%2Fzh-yue.wikipedia.org%2Fwiki%2F%25E5%2591%25A8%25E5%2586%25AC%25E9%259B%25A8&tbnid=wvoPvk5tLQGvKM&vet=12ahUKEwinxbLH-6_xAhXIBKYKHeSIDAYQMygeegUIARD3AQ..i&docid=bYl0H6qD4wpRHM&w=600&h=800&q=%E5%91%A8%E5%86%AC%E9%9B%A8&ved=2ahUKEwinxbLH-6_xAhXIBKYKHeSIDAYQMygeegUIARD3AQ)
-![coding](https://badgen.net/badge/leetcode/coding%20together/cyan)
-![sharing](https://badgen.net/badge/readers/share%20together/cyan)
+[![reading](https://badgen.net/badge/books/read%20together/cyan)]
+[![coding](https://badgen.net/badge/leetcode/coding%20together/cyan)]
+[![sharing](https://badgen.net/badge/readers/share%20together/cyan)
+[![stars](https://badgen.net/github/stars/doocs/wulimax/reactApp)]
+[![forks](https://badgen.net/github/forks/wulimax/reactApp)]
+[![contributors](https://badgen.net/github/contributors/wulimax/reactApp)]
+[![help-wanted](https://badgen.net/github/label-issues/wulimax/reactApp/help%20wanted/open)]
+[![issues](https://badgen.net/github/open-issues/wulimax/reactApp)]
 
 ### 内容说明：
 左林林个人文档
