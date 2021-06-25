@@ -1170,6 +1170,39 @@ GET /index/_search
 
 全文检索多字段搜索
 
+    GET /index/_search
+    {
+        bool:{
+            "should":{
+                term:{field:value},
+                term:{field:value},
+            }
+        }
+    }
+
+    and match 转term+must
+
+    GET /index/_search
+    {
+      bool:{
+        "must":{
+           query:'value',
+            operator:and
+        }
+       }
+    }
+    等价于
+    GET /index/_search
+    {
+        bool:{
+            "must":{
+                term:{field:value},
+                term:{field:value},
+            }
+        }
+    }
+
+
 ![img.png](images/duoziduansousuo.png)
 
 手动控制全文检索的精准度
@@ -1188,9 +1221,22 @@ boost的细粒度搜索条件控制
     测试环境下，将所有的primary设置为1
     测试环境下搜索附带search_type = dfs_query_then_query参数，会将local IDF取出来计算global IDF
 
-基于dis_max 实现best_field策略进行多字段搜索
+基于dis_max实现best_field策略进行多字段搜索
 
     dix_max取某一个query最大的分数
+    GET /index/_search
+    {
+        "query":{
+        "dis_max":{
+            "queries"[
+            {match:"title":"java solution"},
+            {match:"content":"java solution"}
+         ]
+        }  ,
+        tie_ breaker:0.3
+    }
+    
+    }
 ![img.png](images/best_field.png)
 
 基于tie_ breaker参数优化dis_ max搜索效果
@@ -1202,8 +1248,10 @@ boost的细粒度搜索条件控制
     {
         "query":{
         "dis_max":{
-            "queries"{
-         }
+          "queries"[
+            {match:"title":"java solution"},
+            {match:"content":"java solution"}
+         ]
         }  ,
         tie_ breaker:0.3
     }
@@ -1216,7 +1264,8 @@ boost的细粒度搜索条件控制
         {
         query":{
           multi_match":{
-            "query":"",
+             "query":"aaa",
+             filed:["field1","field2"],
              type:"best_field",
              "tie_breaker":0.3,
             "minimum_should_match":50%
@@ -1229,12 +1278,12 @@ boost的细粒度搜索条件控制
     {
         "query":{
         "dis_max":{
-            "queries"{  
-            "query":"aaa",
-             filed:["field1","field2"],
+            "queries"[
+            {match:"title":"java solution"
             "minimum_should_match":50%
-            "boost":2
-         }
+            "boost":2},
+            {match:"content":"java solution"}
+        ]  ,
         }  ,
         tie_ breaker:0.3
     }
