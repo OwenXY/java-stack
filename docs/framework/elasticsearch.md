@@ -1357,7 +1357,7 @@ phrase matching搜索技术
        GET /index/_search
     {
         "query":{
-          boolean:{
+          bool:{
              must:{
                 "match":{
                   "field":{
@@ -1377,7 +1377,43 @@ phrase matching搜索技术
       }
      }
     }
-使用rescoring机制优化近似匹配搜索的性能
+
+使用rescore机制优化近似匹配搜索的性能
+    
+    match 和 match_phrase区别
+        match：只要简单的匹配到了一个term，就可以将doc作为结果返回
+        match_phrase：首先扫描到所有的term的doc list；找到包含所有的
+        term 的doc list；然后对每个doc都计算每个term的position，是否符合指定范围
+        slop，需要进行复杂的运算，来判断是否通过slop，
+    match query的性能要比match_phrase和 proximity match(有slop) 近似匹配要高很多，
+    因为后两者豆芽计算position 的距离。match query 比match_phrase性能搞10被，比proximity match 高20倍
+    但是别担心，因为es的性能都是毫秒级别的，match query一般就在几毫秒或者几十毫秒，所以是可以接受的
+    
+    优化proximity match的性能一般就是减少要进行proximity match搜索的documeng 的数量
+    主要思路就是match query 先过滤出需要的数据，然后再用proximity match来根据term距离来提高doc分数
+    rescore：重打分
+
+```java
+   GET/index/_search
+        {
+        "query":{
+                    "match":{
+                     "field":" vaule",
+                     
+               }
+          },
+        rescore:{
+            "window_size":50,
+             rescore_query:{
+                "match_phrase":{
+                "field":{
+                "query":"value"
+                "slop":"50"
+                }
+            }
+           }
+        }
+```
 
 ![img.png](images/rescoring.png)
 
