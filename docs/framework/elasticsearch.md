@@ -1348,6 +1348,35 @@ phrase matching搜索技术
 
 混合使用match和近似匹配实现召回率与精准度的平衡
 
+    召回率（recall）： 比如说你搜索一个java spark 总共有100个doc，能返回多少个结果作为doc，就是召回率。
+    精准度（precision）:比如你搜索一个java spark ,能不能尽可能的让包含java spark，或者java和spark离得很近的排在前面
+    近似匹配的时候，召回率比较低，精准度太高了
+    但是有时候可能我们希望的是匹配到几个term中的部分，就可以作为结果出来，这样可以提高召回率。同时我们也希望用上match_phrase根据距离提高分数的功能，
+    让几个term距离越近的分数越高，优先返回
+    就是优先返回召回率同时兼顾精准度
+       GET /index/_search
+    {
+        "query":{
+          boolean:{
+             must:{
+                "match":{
+                  "field":{
+                    "query":" vaule",
+                    "minimum_should_match" :"50%"
+              },
+              should:{
+                "match_phrase":{
+                    "field":{
+                       "query":"value"
+                        "slop":"50"
+                    }
+                }
+            }
+          }
+        }
+      }
+     }
+    }
 使用rescoring机制优化近似匹配搜索的性能
 
 ![img.png](images/rescoring.png)
