@@ -1677,7 +1677,215 @@ histogram区间统计
       }
     }
 
+
+排序
+
+    es聚合排序默认是按照每组的doc_count降序来排的
+    如果按照指定字段来排序
+    GET /index/_search/
+    {
+        "size":"0",
+        "aggs":{
+            "group_name":{
+                "terms":{
+                  "field":"value",
+                  "order":{
+                    "group_name_1":"desc"
+                },
+               "aggs":{
+                    "group_name_1":{
+                     "avg":{"field":"value"}
+                    }
+
+                }
+            }
+    
+        }
+
+        }
+    }
+
+并行聚合算法、三角选择原则、近似聚合算法
+
+    有些聚合算法，是很容易可以并行的，比如说max
+    有些聚合分析的算法是不好并行的，比如说count(distinct), 并不是说在每个node上，
+    直接就出一些distinct value，就可以了，因为有些数据可能会很多近似估计后的结构，
+    不完全准确，但是速度会很快，一一般是完全精准的算法的性能的十倍
+
+    三角选择原则：精准+实时+大数据
+    1.精准+实时：没有大数据，数据量很小，那么一般就是单机跑，随便你怎么玩就可以
+    2.精准+大数据：hadoop，批处理，非实时，可以处理海量数据，保证精准，可能会跑几个小时
+    3.大数据+实时：es 不精准，近似估计，可能会有百分之几的错误率
+
+    近似聚合算法
+    如果采用近似估计的算法，延时在100ms左右，0.5%错误
+    如果采用100%精准的算法：延时一般在5s到几十秒 几个小时，0%错误率
+
+
+
+去重
+
+    es去重，cardinality metric，对每个bucket中指定的filed去重，取去重后的count,类似count(distinct)
+     GET /index/_search/
+    {
+        "size":"0",
+        "aggs":{
+            "group_name":{
+                "terms":{
+                  "field":"value",
+                  "order":{
+                    "group_name_1":"desc"
+                },
+               "aggs":{
+                    "distinct_group_name":{
+                     "cardinality":{"field":"value","precision_threshold":"100"}
+                    }
+
+                }
+            }
+    
+        }
+
+        }
+    }
+    precision_threshold: precision_threshold* 8内存的消耗
+    占用内存很小而且你的unique value如果在值以内，那么可以确保100%精准
+    precision_threshold 设置的值越大，占用内存越大，可以确保更多unique value的100%准确
+    
+HyperLog++（HLL）算法性能优化(一般)
+
+    cardinality底层是HyperLog算法
+    会对所有的unique value取hash值，通过hash值近似的去求distinct count，
+    默认情况下 ，发送一个cardinality请求的时候，会动态的对所有的filed value2
+    取hash值，前移到建立索引的时候
+     
+    put /index/_mapping
+     {
+        "mapping":{
+            properties:{
+             "type":"text",
+            "fileds":{
+                "hash":{"type":"murmur3"}
+            }
+        }
+        }
+    }
+
+    查询时
+        GET /index/_search/
+    {
+        "size":"0",
+        "aggs":{
+            "group_name":{
+                "cardinality":{
+                  "field":"type.hash",
+                  "order":{
+                    "group_name_1":"desc"
+                }
+            }
+        }
+    }
+
+
+percentiles百分比算法
+    
+    GET /index/_search/
+    {
+        "size":"0",
+        "aggs":{
+            "group_name":{
+                "percentiles":{
+                  "field":"latency",
+                  "percents":{
+                    50，95，99
+                }
+            }
+        }，
+        "latency_ave":{
+        "avg":{field:"value"}
+        }
+    }
+
+
+      GET /index/_search/
+    {
+        "size":"0",
+        "aggs":{
+            "group_name":{
+                "percentiles":{
+                  "field":"latency",
+                  "percents":{
+                    50，95，99
+                }
+            },
+        "aggs":{
+            "group_name_1":{
+                "percentile_ranks":{
+                  "field":"latency",
+                  "percents":{
+                    50，95，99
+                }
+            },
    
+        }，
+        
+    }
+
+
+基于doc value正排索引聚合分析内部原理
+
+    核心原理
+        与倒排索引类似，正排索引也会写入磁盘文件中，然后呢os cache先进行缓存，以提升 doc value正排索引的性能
+        如果 os cache 内存大小不足够放下整个正排索引，就会将doc value数据写入到磁盘文件中
+    
+    性能问题：
+        es官网建议，es大量是基于os cache来进行缓存和提升性能的，不建议用JVM内存来进行缓存
+        那样会导致GC和oom的问题
+        一般来说给jvm更少的内存，给os cache更大的内存
+        os cache可以提升doc value和倒排索引的缓存和查询效率
+
+    column压缩：
+      1.所有的值相同，直接保留单值
+      2.....
+      3.
+    disable doc value
+        如果的确不需要用到doc value，比如聚合，排序等操作，那么可以禁用，减少磁盘占用
+        put /index/
+        {
+            "mapping"
+                "properties":{
+                   "field":"keyword",
+                    "doc_values":false
+                }
+        }
+    doc_values:false 禁用倒排索引
+
+string field 和fielddata原理
+
+    对分词的field直接执行聚合操作，会报错，
+    大概的意思是说，你必须要打开fielddata，然后将正排索引的数据加入到缓存中，才可以对分词的field进行聚合操作
+    会消耗很大的内存
+  
+    对不分词的field执行聚合操作，直接可以执行，不需要设置fielddata ：true
+   
+    分词field + fielddata的工作原理
+        如果你的某个fie1d不分词，那么在建立索引的时候，会自动生成doc value（正排索引），针对这些不分词的fie1d 执行聚合操作，直接就可以执行
+        分词的fie1d，是没有doc value的，所以必须打开是使用fielddata，那么必须将fielddata = true ，那么es在进行聚合操作的时候，会现场对
+        field建立一份正排索引，完全存于内存中，结构和doc value类似，如果是ngram或者是大量的term，那么必将
+        占用大量的内存，导致性能很差
+
+    fielddata加载是lazy加载的，对一个analyzed field执行聚合时，才会加载，而且是field-level
+    一个index的field所有的doc都会被加载，而不是少数doc
+    不是index-time创建，是query-time创建
+
+    fielddata内存限制
+        indices.fielddata.cache.size:20%,超出限制清楚内存已有的fielddata数据
+        默认设置无限制，限制内存的使用，但是会导致频繁evict和reload，大量的IO性能损耗，以及内存碎片和gc 
+    监控fielddata内存使用
+         GET /_stats/fielddata?fileds=*
+         GET /_nodes/_stats/indices/fielddata?fileds=*
+         GET /_nodes/_stats/indices/fielddata?level=indices&fileds=*
+
 ### 数据建模实战
 
 ### 完成建议
