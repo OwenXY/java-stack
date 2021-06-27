@@ -1881,11 +1881,69 @@ string field 和fielddata原理
     fielddata内存限制
         indices.fielddata.cache.size:20%,超出限制清楚内存已有的fielddata数据
         默认设置无限制，限制内存的使用，但是会导致频繁evict和reload，大量的IO性能损耗，以及内存碎片和gc 
+   
     监控fielddata内存使用
          GET /_stats/fielddata?fileds=*
          GET /_nodes/_stats/indices/fielddata?fileds=*
          GET /_nodes/_stats/indices/fielddata?level=indices&fileds=*
+   
+    Circuit breaker 
+            如果一次query load的fielddata超过总内存，就会oom 
+    indices.breaker.fielddata.limit: fielddata内存限制默认是60%
+    indices.breaker.request.limit: 执行聚合操作的内存限制，默认40%
+    indices.breaker.total.limit: 综合上面两个，限制在70%以内
 
+    fielddata filter细粒度内存加载控制
+        POST /index/_mapping
+        {
+            "field":{
+                "type": "text",
+                "fielddata"：{
+                    "filter": {
+                    "frequency":{
+                        "min":"0.01",
+                        "min_segment_size":500
+                        }
+                    }
+                }
+            }
+        }
+       min:仅仅加载至少在1%的doc中出现过的term对于的fielddata
+       min_segment_size：少于500doc的segment 不加载fielddata
+       这两个参数比较底层，一般不设置
+
+    fielddata预加载机制，以及序号标记预加载
+        如果真的要对某个分词的field进行聚合，那么在query-time的时候现场生产fielddata并加载到内存，速度可能比较慢，此时我们可以fielddata预加载
+         POST /index/_mapping
+        {
+           "properties":{
+            "field":{
+                "type": "text",
+                "fielddata"：{
+                    "loading"："eager"
+                }
+            }
+         }
+        }
+
+
+      POST /index/_mapping
+        {
+           "properties":{
+            "field":{
+                "type": "text",
+                "fielddata"：{
+                    "loading"："eager_global_ordinals"
+                }
+            }
+         }
+        }
+
+海量bucket优化机制：从深度优化到广度优化
+
+![img.png](images/sdyx.png)
+
+    
 ### 数据建模实战
 
 ### 完成建议
