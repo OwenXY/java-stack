@@ -1581,9 +1581,15 @@ bucket嵌套实现多层下钻分析：
               },
              "aggs":{
                 "group_name_1":
-                    "ave":{
+                    "avg":{
                         "field":"value"
-                    }
+                    },
+                       "max":{
+                        "field":"value"
+                    },
+                       "min":{
+                        "field":"value"
+                    },
                 },
              "aggs":{
                 "group_name_1":
@@ -1600,7 +1606,36 @@ bucket嵌套实现多层下钻分析：
         }
       }
     }
-    
+    avg:计算组内平均值
+    max:计算组内最大值
+    min:计算组内最小值
+    sum:计算组内平均值
+histogram区间统计
+
+    histogram，类似terms，也是进行bucket分组操作，按照这个field的值的各个范围区间，进行bucket分组操作
+    按照数字区间：
+    "histogram":{
+             "field":"value"
+             "interval":2000
+             },
+    interval:2000 划分范围，比如0-2000，2000-4000 bucket
+     去根据field的值看落在哪个区间，就会将这条数据放在哪个bucket中
+    按照日期区间；
+        "histogram":{
+             "field":"value"
+             "interval":"month"
+             "format":"yyyy-MM-dd"
+            "min_doc_count":0
+            "extended_bounds":{
+                "min":"2017-01-10",
+                "max":"2017-11-10",
+            }
+         },
+        min_doc_count:即使某个日期interval一条数据也没有，那么这个区间也是要返回的，不然默认会过滤掉这个区间
+        extended_bounds：划分bucket会限定起止日期
+        extended_bounds.min：开始日期
+        extended_bounds.max：截止日期
+   
 ### 数据建模实战
 
 ### 完成建议
