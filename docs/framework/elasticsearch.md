@@ -1436,6 +1436,106 @@ phrase matching搜索技术
 
 ### 深入聚合数据分析
 
+bucket与metric核心概念
+
+    bucket:对数据进行分组，每一组就是一个bucket
+    metric:对一个数据组进行统计，就是对一个bucket执行某种聚合分析操作，比如说求最大值，求最小值
+    select count(*) from table group by id 
+    bucket:group by id --> 那些id相同的数据，就会被划分到一个bucket中
+    metric:count(*),对每个id 对应饿bucket中的所有数据，计算一个数量
+
+聚合分组最基本语法
+
+    GET /index/_search/
+    {
+       size:0,
+       "aggs":{
+          "group_name": {
+              "terms":{
+                    "field":"value"
+                }
+            }
+        }
+    }
+    size：只获取聚合结果，而不要执行聚合的原始数据
+    aggs: 固定语法，要对一份数据执行分组聚合操作
+    group_name：就是对每个aggs，都要起一个名字，这个名字是自定义的，你取什么都OK 
+    terms:根据字段的值进行分组
+    filed:根据指定的字段的值进行分组
+
+
+聚合查询结果分析： 
+
+    hits.hits:我们指定了size是0，所以hits.hits就是空的，否则会把执行聚合的那些原始数据给你返回回来
+    aggregations:聚合结果
+    group_name：我们执行的聚合的名称
+    buckets:我们执行的field划分出的buckets
+    doc_count:这个bucket分组内有多少数据
+    默认的排序规则:按照doc_count倒叙排序
+
+聚合分组后，执行每组的metric聚合操作：
+
+    GET /index/_search/
+    {
+        size:0,
+       "aggs":{
+         "group_name": {
+         "terms":{
+         "field":"value"
+          },
+         "aggs":{
+            "group_name_1":
+                "ave":{
+                    "field":"value"
+                }
+            }
+        }
+      }
+    }
+    doc_count: 其实知识es的bucket操作默认执行的一个内置的metric
+    对每组bucket执行metric聚合统计操作
+    在一个aggs执行的bucket操作（terms），平级的json结构下，再加一个aggs，
+    这个aggs内部同样去个名字，执行metric操作avg（max，min），对之前的每个bucket中的数据的执行field，求一个平均值
+    
+    select avg(field) from tabel group by filed
+
+
+bucket嵌套实现多层下钻分析：
+    
+    下钻的意思是：已经分了一个组，比如说颜色的分组，然后还要对这个分组内的数据在分组，比如说一个颜色内有多个不同品牌的组
+    最后对每个最小粒度的分组进行聚合分析操作，这就叫做下钻分析。 
+  
+    es实现下钻分析，就是对bucket进行多层嵌套，多次分组
+         GET /index/_search/
+    {
+        size:0,
+       "aggs":{
+         "group_name": {
+             "terms":{
+             "field":"value"
+              },
+             "aggs":{
+                "group_name_1":
+                    "ave":{
+                        "field":"value"
+                    }
+                },
+             "aggs":{
+                "group_name_1":
+                    "terms":{
+                        "field":"value"
+                    },
+                     "aggs":{
+                       "group_name_1":
+                        "ave":{
+                           "field":"value"
+                    }
+                },
+                },
+        }
+      }
+    }
+    
 ### 数据建模实战
 
 ### 完成建议
