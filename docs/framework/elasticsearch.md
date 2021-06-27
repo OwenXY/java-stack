@@ -1635,6 +1635,48 @@ histogram区间统计
         extended_bounds：划分bucket会限定起止日期
         extended_bounds.min：开始日期
         extended_bounds.max：截止日期
+
+搜索+聚合
+
+    es aggregation scope 任何的聚合都必须在搜索的结果中执行，搜索结果就是分析的scope
+    
+            GET /index/_search/
+    {
+        query：{},
+        size:0,
+       "aggs":{
+         "group_name": {
+             "terms":{
+             "field":"value"
+              },
+             "aggs":{
+                "group_name_1":
+                    "avg":{
+                        "field":"value"
+                    },
+                       "max":{
+                        "field":"value"
+                    },
+                       "min":{
+                        "field":"value"
+                    },
+                },
+             "aggs":{
+                "group_name_1":
+                    "terms":{
+                        "field":"value"
+                    },
+                     "aggs":{
+                       "group_name_1":
+                        "ave":{
+                           "field":"value"
+                    }
+                },
+                },
+        }
+      }
+    }
+
    
 ### 数据建模实战
 
