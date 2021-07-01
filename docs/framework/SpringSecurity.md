@@ -368,3 +368,8 @@ public interface UserDetailsService {
     UserDetailsService常见的实现类有jdbcDaoImpl，InMemoryUserDetailsManager,前者从数据库加载用户，后者从内存加载用户，
     当然你也可以自己实现UserDetailsService。
 
+Spring Security Architecture
+
+前面我们已经介绍了Spring Security的核心组件(SecurityContextHolder,SecurityContext和Authoritarian)
+和核心服务(AuthenticationManager,ProviderManager和AuthenticationProvider)，最后我们来回顾一下spring security整体架构
+
