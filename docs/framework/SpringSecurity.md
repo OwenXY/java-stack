@@ -69,4 +69,11 @@ public interface Authentication extends Principal, Serializable {
 
 **小结**
 
-    
+    下面我们来总结一下，SecurityContextHolder，SecurityContext，Authoritarian这三个对象的关系
+
+    SecurityContextHolder用来保存SecurityContext（安全上下文对象），通过调用SecurityContext对象中的方法，如getAuthentication()方法，
+    我们可以方便的获取Authentication对象，利用该对象我们进一步获取已认证用户的详细信息
+
+    SecurityContextHolder，SecurityContext 和 Authentication 的详细定义如下所示：
+
+![img.png](SecurityContextHolder_SecurityContext_Authentication%20.png)
