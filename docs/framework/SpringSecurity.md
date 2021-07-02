@@ -391,6 +391,20 @@ Spring Security的servlet支持是基于Servlet Filter的，所以Filter先看�
 
 #### Spring Security过滤器链
 
-客户端(APP和后台系统)向应用程序发送请求，然后应用程序根据URL路径来确定该请求过滤器链(filter)以及最终的具体Servlet控制器(Controller)
+    客户端(APP和后台系统)向应用程序发送请求，然后应用程序根据URL路径来确定该请求过滤器链(filter)以及最终的具体Servlet控制器(Controller)
 
 ![img.png](images/SpringSecurityFilters.png)
+
+从上图我们可以看出Spring Security以一个单Filter(FilterChainProxy)存在于整个过滤器链中，而这个FilterChainProxy实际内部代理众多Spring Security Filter。
+这简直就是套娃啊！
+
+#### 过滤器链的形成过程
+
+    再多说一点Filter们的初始化过程，首先Filter们按照一定顺序被SecurityBuilder的实现来组装为SecurityFilterChain,
+    然后通过webSecurity注入到FilterChainProxy中去，接着FilterChainProxy又在webSecurityConfiguration中以
+    springSecurityFilterChain的名称注册为Spring Bean。实际上还有一个隐藏层DelegationFilterProxy代理了
+    SpringSecurityFilterChain注入到最后整个Servlet过滤链中。
+
+    简单画个图：
+
+![img.png](images/FilterChainProxy.png)
