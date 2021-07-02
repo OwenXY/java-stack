@@ -5,7 +5,8 @@
     - [核心组件](#核心组件)
     - [身份认证](#身份认证)
     - [核心服务](#核心服务)
-
+- [Spring Security 与 Spring Boot整合 ](#SpringSecurity与SpringBoot整合)
+  - [SpringSecurity中的过滤器链机制](#SpringSecurity中的过滤器链机制)
 
 # 架构设计
 
@@ -373,3 +374,23 @@ Spring Security Architecture
 前面我们已经介绍了Spring Security的核心组件(SecurityContextHolder,SecurityContext和Authoritarian)
 和核心服务(AuthenticationManager,ProviderManager和AuthenticationProvider)，最后我们来回顾一下spring security整体架构
 
+
+## 
+
+### SpringSecurity与SpringBoot整合
+
+Spring Security的servlet支持是基于Servlet Filter的，所以Filter先看一下作用是有帮助的
+下图显示了单个Http请求的处理程序的典型分层
+
+### SpringSecurity中的过滤器链机制
+
+#### 前言
+
+    过滤器作为Spring Security的重中之重，我们需要了解其中的机制。这样我们才能根据业务需求变化进行定制。
+     今天我们来探讨一下Spring Security中的过滤器机制
+
+#### Spring Security过滤器链
+
+客户端(APP和后台系统)向应用程序发送请求，然后应用程序根据URL路径来确定该请求过滤器链(filter)以及最终的具体Servlet控制器(Controller)
+
+![img.png](images/SpringSecurityFilters.png)
