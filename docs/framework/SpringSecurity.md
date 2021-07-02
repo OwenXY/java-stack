@@ -387,15 +387,18 @@ Spring Security的servlet支持是基于Servlet Filter的，所以Filter先看�
 #### 前言
 
     过滤器作为Spring Security的重中之重，我们需要了解其中的机制。这样我们才能根据业务需求变化进行定制。
-     今天我们来探讨一下Spring Security中的过滤器机制
+    今天我们来探讨一下Spring Security中的过滤器机制
+  
+     Filter每个的调用顺序非常重要
 
 #### Spring Security过滤器链
 
     客户端(APP和后台系统)向应用程序发送请求，然后应用程序根据URL路径来确定该请求过滤器链(filter)以及最终的具体Servlet控制器(Controller)
+    
 
 ![img.png](images/SpringSecurityFilters.png)
 
-从上图我们可以看出Spring Security以一个单Filter(FilterChainProxy)存在于整个过滤器链中，而这个FilterChainProxy实际内部代理众多Spring Security Filter。
+从上图我们可以看出Spring Security以一个单Filter(FilterChainProxy)存在于整个过滤器链中，而这个FilterChainProxy实际内部代理众多Spring Security Filter(SecurityFilterChain)。
 这简直就是套娃啊！
 
 #### 过滤器链的形成过程
@@ -408,3 +411,12 @@ Spring Security的servlet支持是基于Servlet Filter的，所以Filter先看�
     简单画个图：
 
 ![img.png](images/FilterChainProxy.png)
+    
+    事实上 Spring Security的内置Filter对于Spring IOC容器都是不可见的。
+    
+    Spring Security 允许有多 条过滤器链并行，Spring Security 的 FilterChainProxy 可以代理多条过滤器链并根据不同的 URI 匹配策略进行分发。
+    但是每个请求每次只能被分发到一条过滤器链。如下图所示
+
+![img.png](images/FilterChainProxy_1.png)
+
+    实际每条过滤链 就是一个 SecurityFilterChain
