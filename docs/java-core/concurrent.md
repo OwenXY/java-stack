@@ -153,3 +153,105 @@ public class Counter {
 ```java
    Collections.unmodifiableList(new ArrayList(data));
 ```
+
+
+## 等效不可变对象CopyOnWriteArrayList适用场景分析
+
+写时复制的最终目的时为了读多写少的场景，通过写时复制的机制，让大量的读请求在无需加锁牺牲性能的情况下保证多线程并发读写的情况下线程安全。
+
+![img.png](images/CopyOnWriteArrayList.png)
+
+    两个线程并发读取CopyOnWriteArrayList的情况，其中线程1需要通过iterator()方法读取数据，
+    其中集合中的元素为元素1、元素2，但是这个时候线程2需要往集合中添加一个元素：元素3，这个时候
+    线程2的操作时直接基于集合当前的数据进行复制一份到新的数组，最后将array变量指向新的一个数组。
+    
+    这里注意思考这样一个场景：假设线程1在遍历元素的时候，读取到了元素1，但是还没有读取到元素2的时候
+    线程2添加了元素3，这个时候线程1是无法读取到元素3的。这是因为线程1和线程2操作的数组不是同一个数组。
+    这也是CopyOnWriteArrayList的一个特点：弱一致性。
+    意思就是说线程1看到的是某一个时刻的一份数据快照，无法保证能读到最细你的数据。
+
+CopyOnWriteArrayList使用场景：
+    
+    总的来说，CopyOnWriteArrayList适用于读多写少的场景，
+
+## 线程在执行过程中的状态是如何流转的？
+
+![img.png](images/java_thread.png)
+
+线程各个状态的说明：
+
+NEW(初始化状态)
+    
+    实现Runable接口和继承Thread可以得到一个线程类。new一个实例出来，线程就进入了初始化状态。
+
+RUNNABLE（就绪，运行中状态）
+
+    ready就绪
+    1.就绪状态只是说你自个儿运行，调度程序并没有挑选到你，你就永远是就绪状态。
+    2.调用现成的start()方法，此线程进入就绪状态。
+    3.当前线程sleep方法结束，其他线程join()结束，等待用户输入完毕，某个线程拿到对象锁，这些线程也将
+    进入就绪状态。
+    4.当前线程时间片用完了，调用当前线程的yield()方法，当前线程进入就绪状态。
+    5.锁池里的线程拿到对象锁后，进入就绪状态。
+
+RUNNING （运行中状态）
+
+    线程调度程序从可运行池中选择一个线程作为当前线程时线程所处的状态。这也是线程进入运行状态的唯一一种方式。
+
+BLOCKED（阻塞状态）
+    
+    阻塞状态是线程阻塞进入synchronized关键字修饰方法或者代码块（获取锁）之前的状态。
+    
+WAITING（等待状态）
+
+    调用sleep或者wait方法后线程处于WAITING状态，等待被唤醒。
+
+TIMED_WAITING（等待超时状态）
+
+    调用sleep或者wait方法后线程处理TIMED_WAITING状态，等待被唤醒，或者时间超时唤醒。
+
+TERMINATED（终止状态）
+
+    1.当线程的run()方法完成时，或者主线程main()方法完成时，我们就认为它终止了。这个线程对象也许时活的，但是
+    他已经不是一个单独执行的线程，线程一旦终止，就不能复生。
+    2.在一个终止的线程线程上调用star()方式，会抛出iIIegelThreadStateException异常
+
+线程状态之间的切换
+
+1.NEW到RUNNABLE状态
+
+![img.png](images/new-runnable.png)
+
+2.RUNNABLE到BLOCKED状态转换
+
+![img.png](images/RUNNABLE_BLOCKED.png)
+
+3.RUNNABLE到WAITING状态转换
+
+![img.png](images/RUNNABLE_WAITING.png)
+
+    有三种场景会触发线程RUNNABLE向WAITING转换
+    1.获得synchronized隐式锁的线程，调用Object.wait()方法。
+    2.另一种，调用线程同步Thread.join()方法。
+    3.最后一种，调用LockSupport.part()方法。java并发包中的锁，都是基于LockSupport对象实现的。
+    调用LockSupport.park()方法，当前线程会阻塞，线程状态会从RUNNABLE状态转换到WAITING。
+    调用LockSupport.uppark(Thread thread)方法，可唤醒目表线程，目表线程的状态会从WAITING状态
+    转换到RUNNABLE。
+
+4.RUNNABLE与TIMED_WAITING的状态转换
+
+![img.png](images/RUNNABLE_TIMED_WAITING.png)
+
+有5种场景会触发RUNNABLE向TIMED_WAITING转换
+
+1.调用带超时参数的Thread.sleep(long millis)方法。
+2.获取synchronized隐式锁的线程，调用带参数的Objects.wait(long timeout)方法;
+3.调用带超时参数的Thread.join(long millis)方法;
+4.调用带超时参数的LockSupport.parkNanos(Object blocker,long deadline)方法;
+5.调用带超时参数的LockSupport.parkUntil(long deadline);
+
+    这里你会发现TIMED_WAITING和WAITING状态的区别仅仅是触发条件多了超时参数。
+
+5.RUNNABLE到TERMINATED 状态
+
+![img.png](images/RUNNABLE_TERMINATED.png)
