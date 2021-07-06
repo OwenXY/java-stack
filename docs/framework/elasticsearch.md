@@ -1946,7 +1946,65 @@ string field 和fielddata原理
     
 ### 数据建模实战
 
+
 ### 完成建议
+
+    基于complete suggest实现搜索提示
+
+    比如说我们在百度搜索 '大话西游' 百度会自动给你提示 ，
+    '大话西游电影'，'大话西游小说'，'大话西游手游'
+    不用你把所有你想要的文本都输入完，搜索引擎会自动提示你可能想要搜索的那个文本
+    PUT index
+       {
+        "settings": {
+            "number_of_shards": 3,
+            "number_of_replicas": 2
+        },
+     
+        "mappings": {
+            "properties" : {
+            "suggest" : {
+                "type" : "completion"
+            },
+              "id": {
+               "type": "integer"
+            }
+        }
+      }
+    }
+
+    或者
+
+    PUT index
+       {
+        "settings": {
+            "number_of_shards": 3,
+            "number_of_replicas": 2
+        },
+     
+        "mappings": {
+            "properties" : {
+            "title" : {
+                 "type" : "text",
+                "analyzed":"ik_max_word"
+                 "fields": {
+                        "suggest": {
+                            "type": "completion",
+                            "analyzed":"ik_max_word"
+                            "ignore_above": 256
+                        }
+                    }
+            },
+              "id": {
+               "type": "integer"
+            }
+        }
+      }
+    }
+    completion,es实现的时候，是非常高性能的，会建立不是倒排索引，也不是正排索引。
+    就是纯基于前缀搜索的一种特殊数据结构，而且会放在内存中，所以auto completion进行
+    前缀搜索提示性能是非常高的。
+
 
 ### 生产实践集群
 
