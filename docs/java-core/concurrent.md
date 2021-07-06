@@ -259,5 +259,6 @@ TERMINATED（终止状态）
 
 ## 死锁
 
+![img.png](images/deadLock.png)
 
 
