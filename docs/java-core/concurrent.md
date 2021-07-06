@@ -252,6 +252,12 @@ TERMINATED（终止状态）
 
     这里你会发现TIMED_WAITING和WAITING状态的区别仅仅是触发条件多了超时参数。
 
-5.RUNNABLE到TERMINATED 状态
+5.RUNNABLE到TERMINATED状态
 
 ![img.png](images/RUNNABLE_TERMINATED.png)
+
+
+## 死锁
+
+
+
