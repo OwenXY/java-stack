@@ -2005,6 +2005,37 @@ string field 和fielddata原理
     就是纯基于前缀搜索的一种特殊数据结构，而且会放在内存中，所以auto completion进行
     前缀搜索提示性能是非常高的。
 
+    
+    GET /index/_search/
+    {
+      "suggest":{
+        "my-suggest":{
+            "prefix":"大话西游"，
+            "completion":{
+                "field":"suggest"
+            }
+
+            }
+        }
+    
+    或者
+
+    GET /index/_search/
+    {
+      "suggest":{
+        "my-suggest":{
+            "prefix":"大话西游"，
+            "completion":{
+                "field":"title.suggest"
+            }
+
+            }
+        }
+
+
+
+    }
+
 
 ### 生产实践集群
 
