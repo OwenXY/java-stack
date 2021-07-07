@@ -1990,8 +1990,7 @@ string field 和fielddata原理
                  "fields": {
                         "suggest": {
                             "type": "completion",
-                            "analyzed":"ik_max_word"
-                            "ignore_above": 256
+                            "analyzer":"ik_max_word"
                         }
                     }
             },
@@ -2028,12 +2027,8 @@ string field 和fielddata原理
             "completion":{
                 "field":"title.suggest"
             }
-
-            }
+          }
         }
-
-
-
     }
 
 

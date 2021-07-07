@@ -261,4 +261,72 @@ TERMINATED（终止状态）
 
 ![img.png](images/deadLock.png)
 
+## 基于Guarded Suspension模式，优化百万交易系统
 
+一、 Guarded Suspension模式简介
+guarded在这里是“保护”的意思；suspension在这里是“暂时挂起”的意思。所以，Guarded Suspension模式又称为“保护性暂挂模式”；
+
+![img.png](images/GuardedSuspension.png)
+
+创建GuardedQueue类
+
+```java
+public class GuardedQueue {
+    private final Queue<Integer> sourceList;
+
+    public GuardedQueue() {
+        this.sourceList = new LinkedBlockingQueue<>();
+    }
+    
+    public synchronized Integer get() {
+        while (sourceList.isEmpty()) {
+            try {
+                wait();    // <--- 如果队列为null，等待            
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        return sourceList.peek();
+    }
+    
+    public synchronized void put(Integer e) {
+        sourceList.add(e);
+        notifyAll();  //<--- 通知，继续执行    }
+}
+```
+
+测试一下
+
+```java
+public class App {
+    public static void main(String[] args) {
+        GuardedQueue guardedQueue = new GuardedQueue();
+        ExecutorService executorService = Executors.newFixedThreadPool(3);
+        executorService.execute(() -> {
+                    guardedQueue.get();
+                }
+        );
+        Thread.sleep(2000);
+        executorService.execute(() -> {
+                    guardedQueue.put(20);
+                }
+        );
+        executorService.shutdown();
+        executorService.awaitTermination(30, TimeUnit.SECONDS);
+    }
+}
+```
+
+四、总结与拓展
+Guarded Suspension模式的“等待-通知”机制是一种非常普遍的线程间协作的方式。我们在平时工作中经常看到有同学使用“轮询while(true)”的方式来等待某个状态，其实都可以用这个“等待-通知”机制来优化。
+
+
+
+另外，有同学可能会问为什么不用notify() 来实现通知机制呢？
+
+Notify()和notifyAll()这两者是有区别的，notify() 是会随机地通知等待队列中的任意一个线程，而 notifyAll() 会通知等待队列中的所有线程。
+
+
+觉得 notify() 会更好一些的同学可能认为即便通知所有线程，也只有一个线程能够进入临界区。但是实际上使用 notify() 也很有风险，因为随机通知等待的线程，可能会导致某些线程永远不会被通知到。
+
+所以除非经过深思熟虑，否则尽量使用 notifyAll()
